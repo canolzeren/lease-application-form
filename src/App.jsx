@@ -447,6 +447,7 @@ function App() {
           <Route path="/superform" element={<SuperForm />} />
           <Route path="/crm" element={<CRM />} />
           <Route path="/" element={<Navigate to="/superform" replace />} />
+          <Route path="*" element={<Navigate to="/superform" replace />} />
         </Routes>
       </div>
     </Router>
