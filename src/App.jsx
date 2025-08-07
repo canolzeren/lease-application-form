@@ -68,11 +68,18 @@ function SuperForm() {
   const [leaseData, setLeaseData] = React.useState(null);
   const [submittedData, setSubmittedData] = React.useState(null);
 
-  const stepNames = ['Voertuig Selectie', 'Extra Opties', 'Persoonlijke Gegevens'];
+  const stepNames = leaseData?.leaseType === 'private' 
+    ? ['Voertuig Selectie', 'Persoonlijke Gegevens']
+    : ['Voertuig Selectie', 'Extra Opties', 'Persoonlijke Gegevens'];
 
   const handleLeaseComplete = (data) => {
     setLeaseData(data);
-    setCurrentStep(1);
+    // Private Lease gaat direct naar persoonsgegevens, andere lease types naar extra opties
+    if (data.leaseType === 'private') {
+      setCurrentStep(2); // Skip extra opties voor Private Lease
+    } else {
+      setCurrentStep(1); // Financial/Operational gaan naar extra opties
+    }
   };
 
   const handleExtraOptionsComplete = (data) => {
@@ -87,7 +94,12 @@ function SuperForm() {
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      // Voor Private Lease: stap 2 -> stap 0 (skip extra opties)
+      if (leaseData?.leaseType === 'private' && currentStep === 2) {
+        setCurrentStep(0);
+      } else {
+        setCurrentStep(currentStep - 1);
+      }
     }
   };
 
@@ -131,7 +143,7 @@ function SuperForm() {
 
 
 
-      {currentStep === 1 && (
+      {currentStep === 1 && leaseData?.leaseType !== 'private' && (
         <div>
           <div className="step-header">
             <h2>Extra Opties</h2>
@@ -159,7 +171,7 @@ function SuperForm() {
         </div>
       )}
 
-      {currentStep === 3 && (
+      {currentStep === (leaseData?.leaseType === 'private' ? 2 : 3) && (
         <div className="success-screen">
           <div className="success-content">
             <div style={{ fontSize: '60px', color: '#4CAF50', marginBottom: '20px' }}>✓</div>
