@@ -1,6 +1,9 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import './App.css';
+import LeaseForm from './components/LeaseForm.jsx';
+import ExtraOptions from './components/ExtraOptions.jsx';
+import BusinessInfo from './components/BusinessInfo.jsx';
 
 function Navigation() {
   const location = useLocation();
@@ -54,20 +57,207 @@ function Navigation() {
 }
 
 function SuperForm() {
+  const [currentStep, setCurrentStep] = React.useState(0);
+  const [leaseType, setLeaseType] = React.useState(null); // 'financial' of 'private'
+  const [leaseData, setLeaseData] = React.useState(null);
+  const [submittedData, setSubmittedData] = React.useState(null);
+
+  const stepNames = ['Lease Type', 'Voertuig Selectie', 'Extra Opties', 'Persoonlijke Gegevens'];
+
+  const handleLeaseTypeSelect = (type) => {
+    setLeaseType(type);
+    setCurrentStep(1);
+  };
+
+  const handleLeaseComplete = (data) => {
+    setLeaseData(data);
+    setCurrentStep(2);
+  };
+
+  const handleExtraOptionsComplete = (data) => {
+    setLeaseData({ ...leaseData, ...data });
+    setCurrentStep(3);
+  };
+
+  const handleFormComplete = (data) => {
+    setSubmittedData(data);
+    setCurrentStep(4);
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const resetForm = () => {
+    setCurrentStep(0);
+    setLeaseType(null);
+    setLeaseData(null);
+    setSubmittedData(null);
+  };
+
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h1 style={{ color: '#d846b4' }}>SuperForm</h1>
-      <p>Lease aanvraagformulier - Test versie</p>
-      <button style={{ 
-        padding: '10px 20px', 
-        background: '#d846b4', 
-        color: 'white', 
-        border: 'none', 
-        borderRadius: '4px',
-        cursor: 'pointer'
-      }}>
-        Test Knop
-      </button>
+    <div className="app">
+      <div className="header">
+        <h1>Lease Aanvraagformulier</h1>
+        <p>Kies uw lease type en vul het formulier in</p>
+      </div>
+
+      {currentStep < 4 && (
+        <div className="progress-container">
+          <div className="progress-bar">
+            {stepNames.map((stepName, index) => (
+              <div key={index} className={`progress-step ${index <= currentStep ? 'completed' : ''}`}>
+                <div className="progress-icon">
+                  {index < currentStep ? (
+                    <div style={{ color: '#4CAF50', fontSize: '20px' }}>✓</div>
+                  ) : index === currentStep ? (
+                    <div className="current-step-indicator">{index + 1}</div>
+                  ) : (
+                    <div className="progress-step-number">{index + 1}</div>
+                  )}
+                </div>
+                <span className="progress-label">{stepName}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {currentStep === 0 && (
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          <h2>Kies uw lease type</h2>
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '40px' }}>
+            <button
+              onClick={() => handleLeaseTypeSelect('financial')}
+              style={{
+                padding: '40px 60px',
+                border: '2px solid #d846b4',
+                background: 'white',
+                color: '#d846b4',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                minWidth: '200px'
+              }}
+            >
+              <h3>Financial Lease</h3>
+              <p>Voor zakelijke gebruikers</p>
+            </button>
+            <button
+              onClick={() => handleLeaseTypeSelect('private')}
+              style={{
+                padding: '40px 60px',
+                border: '2px solid #d846b4',
+                background: 'white',
+                color: '#d846b4',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                minWidth: '200px'
+              }}
+            >
+              <h3>Private Lease</h3>
+              <p>Voor particuliere gebruikers</p>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {currentStep === 1 && leaseType === 'financial' && (
+        <LeaseForm onComplete={handleLeaseComplete} />
+      )}
+
+      {currentStep === 1 && leaseType === 'private' && (
+        <LeaseForm onComplete={handleLeaseComplete} />
+      )}
+
+      {currentStep === 2 && leaseType === 'financial' && (
+        <div>
+          <div className="step-header">
+            <h2>Extra Opties</h2>
+            <p>Kies de extra opties die u wenst</p>
+          </div>
+          <ExtraOptions 
+            onComplete={handleExtraOptionsComplete} 
+            onBack={handleBack}
+            leaseData={leaseData}
+          />
+        </div>
+      )}
+
+      {currentStep === 2 && leaseType === 'private' && (
+        <div>
+          <div className="step-header">
+            <h2>Persoonlijke Gegevens</h2>
+            <p>Vul uw gegevens in om de aanvraag af te ronden</p>
+          </div>
+          <BusinessInfo 
+            onComplete={handleFormComplete} 
+            onBack={handleBack}
+            leaseData={leaseData}
+          />
+        </div>
+      )}
+
+      {currentStep === 3 && leaseType === 'financial' && (
+        <div>
+          <div className="step-header">
+            <h2>Persoonlijke Gegevens</h2>
+            <p>Vul uw gegevens in om de aanvraag af te ronden</p>
+          </div>
+          <BusinessInfo 
+            onComplete={handleFormComplete} 
+            onBack={handleBack}
+            leaseData={leaseData}
+          />
+        </div>
+      )}
+
+      {currentStep === 4 && (
+        <div className="success-screen">
+          <div className="success-content">
+            <div style={{ fontSize: '60px', color: '#4CAF50', marginBottom: '20px' }}>✓</div>
+            <h2>Uw {leaseType === 'financial' ? 'Financial' : 'Private'} Lease Aanvraag is Succesvol Ingediend!</h2>
+            <p>We hebben uw aanvraag ontvangen en nemen binnen 24 uur contact met u op.</p>
+            
+            {submittedData && (
+              <div className="summary">
+                <h3>Samenvatting van uw aanvraag:</h3>
+                <div className="summary-grid">
+                  <div>
+                    <strong>Naam:</strong> {submittedData.voornaam} {submittedData.achternaam}
+                  </div>
+                  <div>
+                    <strong>Email:</strong> {submittedData.email}
+                  </div>
+                  <div>
+                    <strong>Voertuig:</strong> {submittedData.voertuig}
+                  </div>
+                  <div>
+                    <strong>Maandbedrag:</strong> €{submittedData.maandbedrag}
+                  </div>
+                  <div>
+                    <strong>Looptijd:</strong> {submittedData.looptijd} maanden
+                  </div>
+                  {leaseData?.totaalOpties > 0 && (
+                    <div>
+                      <strong>Extra opties:</strong> €{leaseData.totaalOpties} per maand
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            <button onClick={resetForm} className="reset-button">
+              Nieuwe Aanvraag
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -77,6 +267,7 @@ function CRM() {
     <div style={{ padding: '20px', textAlign: 'center' }}>
       <h1 style={{ color: '#d846b4' }}>CRM Dashboard</h1>
       <p>Beheer alle lease aanvragen - Test versie</p>
+      <p>Supabase integratie wordt later toegevoegd</p>
       <button style={{ 
         padding: '10px 20px', 
         background: '#d846b4', 
