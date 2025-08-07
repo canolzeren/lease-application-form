@@ -4,6 +4,9 @@ import './App.css';
 import LeaseForm from './components/LeaseForm.jsx';
 import ExtraOptions from './components/ExtraOptions.jsx';
 import BusinessInfo from './components/BusinessInfo.jsx';
+import PersonalDetailsExtra from './components/PersonalDetailsExtra.jsx';
+import ContactDetails from './components/ContactDetails.jsx';
+import FinancialDetails from './components/FinancialDetails.jsx';
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase client for CRM data
@@ -69,14 +72,14 @@ function SuperForm() {
   const [submittedData, setSubmittedData] = React.useState(null);
 
   const stepNames = leaseData?.leaseType === 'private' 
-    ? ['Voertuig Selectie', 'Persoonlijke Gegevens']
+    ? ['Voertuig Selectie', 'Persoonlijke Gegevens', 'Contactgegevens', 'Financiële Gegevens']
     : ['Voertuig Selectie', 'Extra Opties', 'Persoonlijke Gegevens'];
 
   const handleLeaseComplete = (data) => {
     setLeaseData(data);
     // Private Lease gaat direct naar persoonsgegevens, andere lease types naar extra opties
     if (data.leaseType === 'private') {
-      setCurrentStep(2); // Skip extra opties voor Private Lease
+      setCurrentStep(1); // Private Lease: stap 1 = Persoonlijke Gegevens
     } else {
       setCurrentStep(1); // Financial/Operational gaan naar extra opties
     }
@@ -94,9 +97,9 @@ function SuperForm() {
 
   const handleBack = () => {
     if (currentStep > 0) {
-      // Voor Private Lease: stap 2 -> stap 0 (skip extra opties)
-      if (leaseData?.leaseType === 'private' && currentStep === 2) {
-        setCurrentStep(0);
+      // Voor Private Lease: stap 4 -> stap 3 -> stap 2 -> stap 1 -> stap 0
+      if (leaseData?.leaseType === 'private') {
+        setCurrentStep(currentStep - 1);
       } else {
         setCurrentStep(currentStep - 1);
       }
@@ -157,7 +160,37 @@ function SuperForm() {
         </div>
       )}
 
-      {currentStep === 2 && (
+      {currentStep === 1 && leaseData?.leaseType === 'private' && (
+        <PersonalDetailsExtra 
+          onComplete={(data) => {
+            setLeaseData(prev => ({ ...prev, personalData: data }));
+            setCurrentStep(2);
+          }} 
+          onBack={handleBack}
+        />
+      )}
+
+      {currentStep === 2 && leaseData?.leaseType === 'private' && (
+        <ContactDetails 
+          onComplete={(data) => {
+            setLeaseData(prev => ({ ...prev, contactData: data }));
+            setCurrentStep(3);
+          }} 
+          onBack={handleBack}
+        />
+      )}
+
+      {currentStep === 3 && leaseData?.leaseType === 'private' && (
+        <FinancialDetails 
+          onComplete={(data) => {
+            setLeaseData(prev => ({ ...prev, financialData: data }));
+            setCurrentStep(4);
+          }} 
+          onBack={handleBack}
+        />
+      )}
+
+      {currentStep === 2 && leaseData?.leaseType !== 'private' && (
         <div>
           <div className="step-header">
             <h2>Persoonlijke Gegevens</h2>
@@ -171,7 +204,7 @@ function SuperForm() {
         </div>
       )}
 
-      {currentStep === (leaseData?.leaseType === 'private' ? 2 : 3) && (
+      {currentStep === (leaseData?.leaseType === 'private' ? 4 : 3) && (
         <div className="success-screen">
           <div className="success-content">
             <div style={{ fontSize: '60px', color: '#4CAF50', marginBottom: '20px' }}>✓</div>
