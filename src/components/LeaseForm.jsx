@@ -103,87 +103,113 @@ export default function LeaseForm({ onComplete }) {
     };
 
     return (
-        <div className="lease-form">
+        <div className="lease-form-container">
             <div className="step-header">
                 <h2>Voertuig Selectie</h2>
-                <p>Kies uw voertuig en configureer de lease</p>
+                <p className="step-description">Kies uw voertuig en configureer de lease</p>
             </div>
 
-            <div className="form-container">
-                <div className="form-section">
-                    <h3>1. Voertuig</h3>
-                    <div className="input-group">
-                        <label>Selecteer voertuig</label>
-                        <select 
-                            value={selectedVoertuig.id} 
-                            onChange={(e) => {
-                                const voertuig = dummyVoertuigen.find(v => v.id === e.target.value);
-                                setSelectedVoertuig(voertuig);
-                            }}
-                        >
-                            {dummyVoertuigen.map(voertuig => (
-                                <option key={voertuig.id} value={voertuig.id}>
-                                    {voertuig.fields.Merk} {voertuig.fields.Model} - {formatCurrency(voertuig.fields.Prijs)}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+            <div className="form-section">
+                <label>Selecteer voertuig</label>
+                <select 
+                    className="vehicle-select"
+                    value={selectedVoertuig.id} 
+                    onChange={(e) => {
+                        const voertuig = dummyVoertuigen.find(v => v.id === e.target.value);
+                        setSelectedVoertuig(voertuig);
+                    }}
+                >
+                    {dummyVoertuigen.map(voertuig => (
+                        <option key={voertuig.id} value={voertuig.id}>
+                            {voertuig.fields.Merk} {voertuig.fields.Model} - {formatCurrency(voertuig.fields.Prijs)}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
-                <div className="form-section">
-                    <h3>2. Financiering</h3>
-                    <CurrencyInput 
-                        label="Verkoopprijs" 
-                        value={formData.verkoopprijs} 
-                        setValue={(value) => setFormData(prev => ({ ...prev, verkoopprijs: value }))} 
-                    />
-                    <CurrencyInput 
-                        label="Aanbetaling" 
-                        value={formData.aanbetaling} 
-                        setValue={(value) => setFormData(prev => ({ ...prev, aanbetaling: value }))} 
-                    />
-                    <div className="input-group">
-                        <label>Gewenst krediet</label>
-                        <div className="readonly-input">
-                            {formatCurrency(calculateGewenstKrediet())}
-                        </div>
-                    </div>
-                    <div className="input-group">
-                        <label>Looptijd (maanden)</label>
-                        <select 
-                            value={formData.looptijd} 
-                            onChange={(e) => setFormData(prev => ({ ...prev, looptijd: Number(e.target.value) }))}
-                        >
-                            {looptijden.map(looptijd => (
-                                <option key={looptijd} value={looptijd}>{looptijd} maanden</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
+            <div className="inputs-container">
+                <CurrencyInput 
+                    label="Verkoopprijs" 
+                    value={formData.verkoopprijs} 
+                    setValue={(value) => setFormData(prev => ({ ...prev, verkoopprijs: value }))} 
+                />
+                <CurrencyInput 
+                    label="Aanbetaling" 
+                    value={formData.aanbetaling} 
+                    setValue={(value) => setFormData(prev => ({ ...prev, aanbetaling: value }))} 
+                />
+            </div>
 
-                <div className="form-section">
-                    <h3>3. Maandbedrag</h3>
-                    <div className="result-box">
-                        <div className="result-item">
-                            <span>Maandbedrag:</span>
-                            <span className="amount">{formatCurrency(formData.maandbedrag)}</span>
-                        </div>
-                        <div className="result-item total">
-                            <span>Totaal maandbedrag:</span>
-                            <span className="amount">{formatCurrency(formData.totaalMaandbedrag)}</span>
-                        </div>
+            <div className="input-group">
+                <label>Gewenst krediet</label>
+                <div className="input-box" style={{ backgroundColor: '#f8f9fa', color: '#6c757d' }}>
+                    {formatCurrency(calculateGewenstKrediet())}
+                </div>
+            </div>
+
+            <div className="form-section">
+                <label>Looptijd (maanden)</label>
+                <div className="looptijd-radio-group">
+                    {looptijden.map(looptijd => {
+                        const bedrag = calculateMaandlast(looptijd);
+                        const isMeestGekozen = looptijd === 48;
+                        return (
+                            <label key={looptijd} className="looptijd-radio-row">
+                                <input
+                                    type="radio"
+                                    name="looptijd"
+                                    value={looptijd}
+                                    checked={formData.looptijd === looptijd}
+                                    onChange={() => setFormData(prev => ({ ...prev, looptijd: looptijd }))}
+                                />
+                                <span className="looptijd-radio-label">
+                                    {looptijd} maanden
+                                    {isMeestGekozen && (
+                                        <span className="looptijd-badge">meest gekozen</span>
+                                    )}
+                                </span>
+                                <span className="looptijd-radio-bedrag">
+                                    {formatCurrency(bedrag)}<span className="looptijd-radio-per">/maand</span>
+                                </span>
+                            </label>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <div className="summary-card">
+                <h3>Overzicht</h3>
+                <div className="summary-main-amount">
+                    {formatCurrency(formData.maandbedrag)}<span>/maand</span>
+                </div>
+                <div className="summary-details">
+                    <div>
+                        <span>Verkoopprijs</span>
+                        <span>{formatCurrency(formData.verkoopprijs)}</span>
+                    </div>
+                    <div>
+                        <span>Aanbetaling</span>
+                        <span>{formatCurrency(formData.aanbetaling)}</span>
+                    </div>
+                    <div>
+                        <span>Gewenst krediet</span>
+                        <span>{formatCurrency(calculateGewenstKrediet())}</span>
                     </div>
                 </div>
+            </div>
 
-                <div className="form-actions">
-                    <button 
-                        onClick={handleSubmit}
-                        className="submit-button"
-                        disabled={selectedVoertuig.id === '1' || formData.verkoopprijs <= 0}
-                    >
-                        Volgende
-                    </button>
+            <div className="bottom-section">
+                <div className="info-line">
+                    <span className="check-icon"></span>
+                    Uitslag binnen: <strong>35 minuten</strong>
                 </div>
+                <button 
+                    className="submit-button"
+                    onClick={handleSubmit}
+                    disabled={selectedVoertuig.id === '1' || formData.verkoopprijs <= 0}
+                >
+                    Volgende stap
+                </button>
             </div>
         </div>
     );
