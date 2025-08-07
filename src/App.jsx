@@ -116,7 +116,7 @@ function SuperForm() {
     <div className="app">
       <div className="header" style={{ padding: '1rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Lease Aanvraagformulier</h1>
-        <p style={{ fontSize: '0.9rem', color: '#6c757d' }}>Kies uw lease type en vul het formulier in</p>
+        <p style={{ fontSize: '0.9rem', color: '#6c757d' }}>Kies uw lease type en vul het formulier in (v2)</p>
       </div>
 
       {currentStep < 4 && (
