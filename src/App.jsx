@@ -490,6 +490,7 @@ function CRM() {
                 <tr style={{ borderBottom: '2px solid #e9ecef' }}>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Naam</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Email</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Lease Type</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Voertuig</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Maandbedrag</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
@@ -497,15 +498,31 @@ function CRM() {
                 </tr>
               </thead>
               <tbody>
-                {requests.map((request) => (
-                  <tr key={request.id} style={{ borderBottom: '1px solid #e9ecef' }}>
+                {requests.map((request, index) => (
+                  <tr key={request.id || index} style={{ borderBottom: '1px solid #e9ecef' }}>
                     <td style={{ padding: '12px' }}>
-                      {request.voornaam || 'N/A'} {request.achternaam || ''}
+                      {request.voornaam || request.aanhef || 'N/A'} {request.achternaam || ''}
                     </td>
                     <td style={{ padding: '12px' }}>{request.email || 'N/A'}</td>
-                    <td style={{ padding: '12px' }}>{request.voertuig || 'N/A'}</td>
                     <td style={{ padding: '12px' }}>
-                      {request.maandbedrag ? `€${request.maandbedrag}` : 'N/A'}
+                      <span style={{
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        background: request.lease_type === 'Private Lease' ? '#9c27b0' : 
+                                   request.lease_type === 'Financial Lease' ? '#2196f3' : '#ff9800',
+                        color: 'white'
+                      }}>
+                        {request.lease_type || 'Onbekend'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      {request.voertuig || request.merk || 'N/A'}
+                      {request.type && ` ${request.type}`}
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      {request.maandbedrag ? `€${request.maandbedrag.toLocaleString()}` : 'N/A'}
                     </td>
                     <td style={{ padding: '12px' }}>
                       <span style={{
@@ -528,6 +545,23 @@ function CRM() {
             </table>
           </div>
         )}
+        
+        {/* Debug sectie voor ontwikkelaars */}
+        <details style={{ marginTop: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px' }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>🔧 Debug: Ruwe Data (Klik om te tonen)</summary>
+          <div style={{ marginTop: '10px', fontSize: '12px' }}>
+            <strong>Eerste 3 records:</strong>
+            <pre style={{ 
+              background: 'white', 
+              padding: '10px', 
+              borderRadius: '4px', 
+              overflow: 'auto',
+              maxHeight: '200px'
+            }}>
+              {JSON.stringify(requests.slice(0, 3), null, 2)}
+            </pre>
+          </div>
+        </details>
       </div>
     </div>
   );
