@@ -264,20 +264,33 @@ function SuperForm() {
 
 function CRM() {
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h1 style={{ color: '#d846b4' }}>CRM Dashboard</h1>
-      <p>Beheer alle lease aanvragen - Test versie</p>
-      <p>Supabase integratie wordt later toegevoegd</p>
-      <button style={{ 
-        padding: '10px 20px', 
-        background: '#d846b4', 
-        color: 'white', 
-        border: 'none', 
-        borderRadius: '4px',
-        cursor: 'pointer'
-      }}>
-        Test Knop
-      </button>
+    <div className="app">
+      <div className="header">
+        <h1>CRM Dashboard</h1>
+        <p>Beheer alle lease aanvragen</p>
+      </div>
+      <div style={{ padding: '20px' }}>
+        <h2>Aanvragen Overzicht</h2>
+        <div style={{ 
+          background: 'white', 
+          borderRadius: '8px', 
+          padding: '40px', 
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          textAlign: 'center'
+        }}>
+          <h3>Supabase integratie tijdelijk uitgeschakeld</h3>
+          <p>De CRM functionaliteit is momenteel in onderhoud. Zodra de Supabase integratie is hersteld, worden hier alle lease aanvragen getoond.</p>
+          <div style={{ 
+            marginTop: '20px', 
+            padding: '15px', 
+            background: '#f0f8ff', 
+            borderRadius: '4px',
+            border: '1px solid #d0e7ff'
+          }}>
+            <strong>Test data:</strong> Er zijn momenteel geen echte aanvragen in de database.
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
