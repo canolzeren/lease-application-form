@@ -149,7 +149,9 @@ function SuperForm() {
       kenteken: data.kenteken || '',
       verkoopprijs: data.verkoopprijs || 0,
       aanbetaling: data.aanbetaling || 0,
-      gewenst_krediet: data.gewenstKrediet || 0
+      gewenst_krediet: data.gewenstKrediet || 0,
+      // Timestamp voor correcte sortering
+      created_at: new Date().toISOString()
     };
 
     console.log('Final Private Lease submission data:', submissionData);
@@ -183,6 +185,9 @@ function SuperForm() {
       console.error('❌ Error in Private Lease submission:', error);
     } finally {
       console.log('=== PRIVATE LEASE SUBMISSION END ===');
+      
+      // Toon een melding dat de data is opgeslagen
+      alert('✅ Private Lease aanvraag succesvol opgeslagen! Check de CRM voor de nieuwe aanvraag.');
     }
   };
 
@@ -288,7 +293,37 @@ function SuperForm() {
             <h2>Uw {leaseData?.leaseType === 'financial' ? 'Financial' : leaseData?.leaseType === 'operational' ? 'Operational' : 'Private'} Lease Aanvraag is Succesvol Ingediend!</h2>
             <p>We hebben uw aanvraag ontvangen en nemen binnen 24 uur contact met u op.</p>
             
-            {submittedData && (
+            {leaseData?.leaseType === 'private' ? (
+              <div className="summary">
+                <h3>Samenvatting van uw Private Lease aanvraag:</h3>
+                <div className="summary-grid">
+                  <div>
+                    <strong>Naam:</strong> {leaseData.personalData?.aanhef} {leaseData.personalData?.voorletters} {leaseData.personalData?.achternaam}
+                  </div>
+                  <div>
+                    <strong>Email:</strong> {leaseData.contactData?.email}
+                  </div>
+                  <div>
+                    <strong>Voertuig:</strong> {leaseData.merk} {leaseData.type}
+                  </div>
+                  <div>
+                    <strong>Kenteken:</strong> {leaseData.kenteken || 'Niet opgegeven'}
+                  </div>
+                  <div>
+                    <strong>Maandbedrag:</strong> €{leaseData.maandbedrag?.toLocaleString()}
+                  </div>
+                  <div>
+                    <strong>Looptijd:</strong> {leaseData.looptijd} maanden
+                  </div>
+                  <div>
+                    <strong>Verkoopprijs:</strong> €{leaseData.verkoopprijs?.toLocaleString()}
+                  </div>
+                  <div>
+                    <strong>Aanbetaling:</strong> €{leaseData.aanbetaling?.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            ) : submittedData && (
               <div className="summary">
                 <h3>Samenvatting van uw aanvraag:</h3>
                 <div className="summary-grid">
