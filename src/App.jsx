@@ -290,10 +290,13 @@ function SuperForm() {
       {currentStep === 3 && leaseData?.leaseType === 'private' && (
         <FinancialDetails 
           onComplete={(data) => {
+            console.log('🎯 FinancialDetails completed for Private Lease');
             const finalData = { ...leaseData, financialData: data };
+            console.log('📊 Final Private Lease data:', finalData);
             setLeaseData(finalData);
             setCurrentStep(4);
             // Submit Private Lease data to database
+            console.log('🚀 Starting Private Lease submission...');
             submitPrivateLeaseData(finalData);
           }} 
           onBack={handleBack}
@@ -543,6 +546,60 @@ function CRM() {
             }}
           >
             {testing ? '⏳ Testing...' : '🔄 Test Database'}
+          </button>
+          <button 
+            onClick={async () => {
+              console.log('🧪 Adding test Private Lease record...');
+              setTesting(true);
+              try {
+                const testData = {
+                  lease_type: 'Private Lease',
+                  status: 'Nieuw',
+                  voornaam: 'Test',
+                  achternaam: 'User',
+                  email: 'test@example.com',
+                  telefoon: '0612345678',
+                  voertuig: 'BMW X3',
+                  maandbedrag: 500,
+                  looptijd: 48,
+                  created_at: new Date().toISOString()
+                };
+                
+                const { data, error } = await supabase
+                  .from('lease_aanvragen')
+                  .insert([testData])
+                  .select();
+                
+                if (error) {
+                  console.error('❌ Test insert failed:', error);
+                  alert(`❌ Test insert failed: ${error.message}`);
+                } else {
+                  console.log('✅ Test record inserted:', data);
+                  alert('✅ Test record successfully inserted!');
+                  await fetchRequests(); // Refresh the list
+                }
+              } catch (err) {
+                console.error('❌ Test insert error:', err);
+                alert(`❌ Test insert error: ${err.message}`);
+              } finally {
+                setTesting(false);
+              }
+            }}
+            disabled={testing}
+            style={{ 
+              background: testing ? '#6c757d' : '#28a745', 
+              color: 'white', 
+              padding: '8px 12px', 
+              border: 'none', 
+              borderRadius: '4px',
+              cursor: testing ? 'not-allowed' : 'pointer',
+              fontSize: '12px',
+              marginTop: '5px',
+              marginLeft: '5px',
+              fontWeight: 'bold'
+            }}
+          >
+            {testing ? '⏳ Testing...' : '🧪 Add Test Record'}
           </button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
