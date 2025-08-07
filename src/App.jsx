@@ -393,6 +393,7 @@ function CRM() {
   const [requests, setRequests] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
+  const [testing, setTesting] = React.useState(false);
 
   React.useEffect(() => {
     fetchRequests();
@@ -509,28 +510,39 @@ function CRM() {
           marginBottom: '20px',
           fontSize: '14px'
         }}>
-          <strong>Debug Info:</strong><br/>
+          <strong>🔧 Debug Info:</strong><br/>
           Supabase configured: {isSupabaseAvailable() ? '✅ Ja' : '❌ Nee'}<br/>
           Supabase client: {supabase ? '✅ Created' : '❌ Not created'}<br/>
           Total requests: {requests.length}<br/>
           Last fetch: {new Date().toLocaleTimeString()}<br/>
+          Testing status: {testing ? '⏳ Testing...' : '✅ Ready'}<br/>
           <button 
-            onClick={() => {
+            onClick={async () => {
               console.log('🔄 Manual database test...');
-              fetchRequests();
+              setTesting(true);
+              try {
+                await fetchRequests();
+                console.log('✅ Database test completed');
+              } catch (err) {
+                console.error('❌ Database test failed:', err);
+              } finally {
+                setTesting(false);
+              }
             }}
+            disabled={testing}
             style={{ 
-              background: '#d846b4', 
+              background: testing ? '#6c757d' : '#d846b4', 
               color: 'white', 
-              padding: '5px 10px', 
+              padding: '8px 12px', 
               border: 'none', 
               borderRadius: '4px',
-              cursor: 'pointer',
+              cursor: testing ? 'not-allowed' : 'pointer',
               fontSize: '12px',
-              marginTop: '5px'
+              marginTop: '5px',
+              fontWeight: 'bold'
             }}
           >
-            🔍 Test Database
+            {testing ? '⏳ Testing...' : '🔄 Test Database'}
           </button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
