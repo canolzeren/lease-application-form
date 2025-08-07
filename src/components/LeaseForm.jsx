@@ -249,23 +249,26 @@ export default function LeaseForm({ onComplete }) {
             {leaseType === 'private' ? (
                 // Private Lease: Uitgebreide financiering sectie
                 <div>
-                    <div className="inputs-container">
-                        <CurrencyInput 
-                            label="Verkoopprijs" 
-                            value={formData.verkoopprijs} 
-                            setValue={(value) => setFormData(prev => ({ ...prev, verkoopprijs: value }))} 
-                        />
-                        <CurrencyInput 
-                            label="Aanbetaling/inruil bedrag" 
-                            value={formData.aanbetaling} 
-                            setValue={(value) => setFormData(prev => ({ ...prev, aanbetaling: value }))} 
-                        />
-                    </div>
+                    <div className="form-section">
+                        <label>Financiering</label>
+                        <div className="inputs-container">
+                            <CurrencyInput 
+                                label="Verkoopprijs" 
+                                value={formData.verkoopprijs} 
+                                setValue={(value) => setFormData(prev => ({ ...prev, verkoopprijs: value }))} 
+                            />
+                            <CurrencyInput 
+                                label="Aanbetaling/inruil bedrag" 
+                                value={formData.aanbetaling} 
+                                setValue={(value) => setFormData(prev => ({ ...prev, aanbetaling: value }))} 
+                            />
+                        </div>
 
-                    <div className="input-group">
-                        <label>Uw gewenst krediet</label>
-                        <div className="input-box" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
-                            {formatCurrency(calculateGewenstKrediet())}
+                        <div className="input-group">
+                            <label>Uw gewenst krediet</label>
+                            <div className="input-box" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
+                                {formatCurrency(calculateGewenstKrediet())}
+                            </div>
                         </div>
                     </div>
 
@@ -300,7 +303,8 @@ export default function LeaseForm({ onComplete }) {
                 </div>
             ) : (
                 // Financial/Operational Lease: Standaard financiering
-                <div>
+                <div className="form-section">
+                    <label>Financiering</label>
                     <div className="inputs-container">
                         <CurrencyInput 
                             label="Verkoopprijs" 
