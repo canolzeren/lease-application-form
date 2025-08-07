@@ -4,6 +4,12 @@ import './App.css';
 import LeaseForm from './components/LeaseForm.jsx';
 import ExtraOptions from './components/ExtraOptions.jsx';
 import BusinessInfo from './components/BusinessInfo.jsx';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 function Navigation() {
   const location = useLocation();
@@ -263,6 +269,101 @@ function SuperForm() {
 }
 
 function CRM() {
+  const [requests, setRequests] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { data, error } = await supabase
+        .from('lease_aanvragen')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching requests:', error);
+        setError('Fout bij het laden van de data');
+      } else {
+        setRequests(data || []);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Fout bij het laden van de data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('nl-NL', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Nieuw': return '#2196F3';
+      case 'In behandeling': return '#FF9800';
+      case 'Goedgekeurd': return '#4CAF50';
+      case 'Afgewezen': return '#F44336';
+      default: return '#757575';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="app">
+        <div className="header">
+          <h1>CRM Dashboard</h1>
+          <p>Beheer alle lease aanvragen</p>
+        </div>
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          <h2>Laden...</h2>
+          <p>Data wordt geladen uit de database</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="app">
+        <div className="header">
+          <h1>CRM Dashboard</h1>
+          <p>Beheer alle lease aanvragen</p>
+        </div>
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          <h2>Fout</h2>
+          <p>{error}</p>
+          <button 
+            onClick={fetchRequests}
+            style={{ 
+              background: '#d846b4', 
+              color: 'white', 
+              padding: '10px 20px', 
+              border: 'none', 
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Opnieuw proberen
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <div className="header">
@@ -270,26 +371,68 @@ function CRM() {
         <p>Beheer alle lease aanvragen</p>
       </div>
       <div style={{ padding: '20px' }}>
-        <h2>Aanvragen Overzicht</h2>
-        <div style={{ 
-          background: 'white', 
-          borderRadius: '8px', 
-          padding: '40px', 
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          textAlign: 'center'
-        }}>
-          <h3>Supabase integratie tijdelijk uitgeschakeld</h3>
-          <p>De CRM functionaliteit is momenteel in onderhoud. Zodra de Supabase integratie is hersteld, worden hier alle lease aanvragen getoond.</p>
+        <h2>Aanvragen Overzicht ({requests.length} aanvragen)</h2>
+        {requests.length === 0 ? (
           <div style={{ 
-            marginTop: '20px', 
-            padding: '15px', 
-            background: '#f0f8ff', 
-            borderRadius: '4px',
-            border: '1px solid #d0e7ff'
+            background: 'white', 
+            borderRadius: '8px', 
+            padding: '40px', 
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            textAlign: 'center'
           }}>
-            <strong>Test data:</strong> Er zijn momenteel geen echte aanvragen in de database.
+            <h3>Geen aanvragen gevonden</h3>
+            <p>Er zijn nog geen lease aanvragen ingediend.</p>
           </div>
-        </div>
+        ) : (
+          <div style={{ 
+            background: 'white', 
+            borderRadius: '8px', 
+            padding: '20px', 
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)' 
+          }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e9ecef' }}>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Naam</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Email</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Voertuig</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Maandbedrag</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}>Datum</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests.map((request) => (
+                  <tr key={request.id} style={{ borderBottom: '1px solid #e9ecef' }}>
+                    <td style={{ padding: '12px' }}>
+                      {request.voornaam || 'N/A'} {request.achternaam || ''}
+                    </td>
+                    <td style={{ padding: '12px' }}>{request.email || 'N/A'}</td>
+                    <td style={{ padding: '12px' }}>{request.voertuig || 'N/A'}</td>
+                    <td style={{ padding: '12px' }}>
+                      {request.maandbedrag ? `€${request.maandbedrag}` : 'N/A'}
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        background: getStatusColor(request.status),
+                        color: 'white'
+                      }}>
+                        {request.status || 'Nieuw'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      {request.created_at ? formatDate(request.created_at) : 'N/A'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
