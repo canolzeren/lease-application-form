@@ -340,20 +340,30 @@ function CRM() {
       setLoading(true);
       setError(null);
       
+      console.log('🔄 Fetching requests from Supabase...');
+      
+      if (!isSupabaseAvailable()) {
+        console.log('⚠️ Supabase not configured');
+        setError('Supabase is niet geconfigureerd. Controleer de .env bestanden.');
+        setRequests([]);
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('lease_aanvragen')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching requests:', error);
-        setError('Fout bij het laden van de data');
+        console.error('❌ Error fetching requests:', error);
+        setError(`Database fout: ${error.message}`);
       } else {
+        console.log('✅ Requests fetched successfully:', data?.length || 0, 'records');
         setRequests(data || []);
       }
     } catch (err) {
-      console.error('Error:', err);
-      setError('Fout bij het laden van de data');
+      console.error('❌ Error:', err);
+      setError(`Fout bij het laden van de data: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -429,7 +439,34 @@ function CRM() {
         <p>Beheer alle lease aanvragen</p>
       </div>
       <div style={{ padding: '20px' }}>
-        <h2>Aanvragen Overzicht ({requests.length} aanvragen)</h2>
+        <div style={{ 
+          background: '#f8f9fa', 
+          padding: '15px', 
+          borderRadius: '8px', 
+          marginBottom: '20px',
+          fontSize: '14px'
+        }}>
+          <strong>Debug Info:</strong><br/>
+          Supabase configured: {isSupabaseAvailable() ? '✅ Ja' : '❌ Nee'}<br/>
+          Total requests: {requests.length}<br/>
+          Last fetch: {new Date().toLocaleTimeString()}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2>Aanvragen Overzicht ({requests.length} aanvragen)</h2>
+          <button 
+            onClick={fetchRequests}
+            style={{ 
+              background: '#d846b4', 
+              color: 'white', 
+              padding: '10px 20px', 
+              border: 'none', 
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            🔄 Vernieuwen
+          </button>
+        </div>
         {requests.length === 0 ? (
           <div style={{ 
             background: 'white', 
