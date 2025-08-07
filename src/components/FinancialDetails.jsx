@@ -49,50 +49,120 @@ export default function FinancialDetails({ onBack, onComplete, initialData = {} 
 
   return (
     <div className="lease-form-container">
-      <h2>Financiële gegevens</h2>
-      <div className="form-section" style={{ maxWidth: 600, margin: '0 auto' }}>
-        <div className="input-group">
-          <label>Dienstverband *</label>
-          <select value={form.dienstverband} onChange={handleChange('dienstverband')} onBlur={handleBlur('dienstverband')} required>
-            <option value="">Maak uw keuze</option>
-            {DIENSTVERBAND_OPTIES.filter(opt => opt).map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
+      <div className="step-header">
+        <h2>Financiële Gegevens</h2>
+        <p className="step-description">Vul uw financiële gegevens in</p>
+      </div>
+
+      <div className="form-section">
+        <div className="inputs-container">
+          <div className="input-group">
+            <label>Dienstverband *</label>
+            <select 
+              className="vehicle-select"
+              value={form.dienstverband} 
+              onChange={handleChange('dienstverband')} 
+              onBlur={handleBlur('dienstverband')} 
+              required
+            >
+              <option value="">Maak uw keuze</option>
+              {DIENSTVERBAND_OPTIES.filter(opt => opt).map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+          <div className="input-group">
+            <label>Beroep *</label>
+            <input 
+              type="text" 
+              className="input-box"
+              value={form.beroep} 
+              onChange={handleChange('beroep')} 
+              onBlur={handleBlur('beroep')} 
+              required 
+            />
+          </div>
         </div>
-        <div className="input-group">
-          <label>Beroep *</label>
-          <input type="text" value={form.beroep} onChange={handleChange('beroep')} onBlur={handleBlur('beroep')} required />
+        <div className="inputs-container">
+          <div className="input-group">
+            <label>Ingangsdatum dienstverband</label>
+            <input 
+              type="date" 
+              className="input-box"
+              value={form.ingang} 
+              onChange={handleChange('ingang')} 
+              onBlur={handleBlur('ingang')} 
+              placeholder="dd/mm/jjjj" 
+            />
+          </div>
+          <div className="input-group">
+            <label>Einddatum dienstverband</label>
+            <input 
+              type="date" 
+              className="input-box"
+              value={form.einde} 
+              onChange={handleChange('einde')} 
+              onBlur={handleBlur('einde')} 
+              placeholder="dd/mm/jjjj" 
+            />
+          </div>
         </div>
-        <div className="input-group">
-          <label>Ingangsdatum dienstverband</label>
-          <input type="date" value={form.ingang} onChange={handleChange('ingang')} onBlur={handleBlur('ingang')} placeholder="dd/mm/jjjj" />
-        </div>
-        <div className="input-group">
-          <label>Einddatum dienstverband</label>
-          <input type="date" value={form.einde} onChange={handleChange('einde')} onBlur={handleBlur('einde')} placeholder="dd/mm/jjjj" />
-        </div>
-        <div className="input-group">
-          <label>Bruto inkomen *</label>
-          <input type="number" min="0" step="1" value={form.inkomen} onChange={handleChange('inkomen')} onBlur={handleBlur('inkomen')} required />
-        </div>
-        <div className="input-group">
-          <label>Woonsituatie *</label>
-          <select value={form.woonsituatie} onChange={handleChange('woonsituatie')} onBlur={handleBlur('woonsituatie')} required>
-            {WOONSITUATIE_OPTIES.map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
+        <div className="inputs-container">
+          <div className="input-group">
+            <label>Bruto inkomen *</label>
+            <input 
+              type="number" 
+              min="0" 
+              step="1" 
+              className="input-box"
+              value={form.inkomen} 
+              onChange={handleChange('inkomen')} 
+              onBlur={handleBlur('inkomen')} 
+              required 
+            />
+          </div>
+          <div className="input-group">
+            <label>Woonsituatie *</label>
+            <select 
+              className="vehicle-select"
+              value={form.woonsituatie} 
+              onChange={handleChange('woonsituatie')} 
+              onBlur={handleBlur('woonsituatie')} 
+              required
+            >
+              {WOONSITUATIE_OPTIES.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="input-group">
           <label>Maandelijkse woonlast *</label>
-          <input type="number" min="0" step="1" value={form.woonlast} onChange={handleChange('woonlast')} onBlur={handleBlur('woonlast')} required />
+          <input 
+            type="number" 
+            min="0" 
+            step="1" 
+            className="input-box"
+            value={form.woonlast} 
+            onChange={handleChange('woonlast')} 
+            onBlur={handleBlur('woonlast')} 
+            required 
+          />
         </div>
       </div>
-      <div className="bottom-section" style={{ marginTop: 32 }}>
+
+      <div className="bottom-section">
+        <div className="info-line">
+          <span className="check-icon"></span>
+          Uitslag binnen: <strong>35 minuten</strong>
+        </div>
         <button className="secondary-button" onClick={onBack}>Terug</button>
-        <button className="submit-button" disabled={!isValid()} onClick={() => onComplete(form)}>
-          Volgende Stap
+        <button 
+          className="submit-button" 
+          disabled={!isValid()} 
+          onClick={() => onComplete(form)}
+        >
+          Aanvraag indienen
         </button>
       </div>
     </div>

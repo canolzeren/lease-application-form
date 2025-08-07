@@ -33,41 +33,107 @@ export default function ContactDetails({ onBack, onComplete, initialData = {} })
 
   return (
     <div className="lease-form-container">
-      <h2>Contactgegevens</h2>
-      <div className="form-section" style={{ maxWidth: 500, margin: '0 auto' }}>
-        <div className="input-group">
-          <label>Straatnaam *</label>
-          <input type="text" value={form.straat} onChange={handleChange('straat')} onBlur={handleBlur('straat')} required />
-        </div>
-        <div className="input-group">
-          <label>Huisnummer *</label>
-          <input type="text" value={form.huisnummer} onChange={handleChange('huisnummer')} onBlur={handleBlur('huisnummer')} required />
+      <div className="step-header">
+        <h2>Contactgegevens</h2>
+        <p className="step-description">Vul uw contactgegevens in</p>
+      </div>
+
+      <div className="form-section">
+        <div className="inputs-container">
+          <div className="input-group">
+            <label>Straatnaam *</label>
+            <input 
+              type="text" 
+              className="input-box"
+              value={form.straat} 
+              onChange={handleChange('straat')} 
+              onBlur={handleBlur('straat')} 
+              required 
+            />
+          </div>
+          <div className="input-group">
+            <label>Huisnummer *</label>
+            <input 
+              type="text" 
+              className="input-box"
+              value={form.huisnummer} 
+              onChange={handleChange('huisnummer')} 
+              onBlur={handleBlur('huisnummer')} 
+              required 
+            />
+          </div>
         </div>
         <div className="input-group">
           <label>Huisnummer toevoeging</label>
-          <input type="text" value={form.toevoeging} onChange={handleChange('toevoeging')} />
+          <input 
+            type="text" 
+            className="input-box"
+            value={form.toevoeging} 
+            onChange={handleChange('toevoeging')} 
+          />
         </div>
-        <div className="input-group">
-          <label>Postcode *</label>
-          <input type="text" value={form.postcode} onChange={handleChange('postcode')} onBlur={handleBlur('postcode')} required />
+        <div className="inputs-container">
+          <div className="input-group">
+            <label>Postcode *</label>
+            <input 
+              type="text" 
+              className="input-box"
+              value={form.postcode} 
+              onChange={handleChange('postcode')} 
+              onBlur={handleBlur('postcode')} 
+              required 
+            />
+          </div>
+          <div className="input-group">
+            <label>Woonplaats *</label>
+            <input 
+              type="text" 
+              className="input-box"
+              value={form.woonplaats} 
+              onChange={handleChange('woonplaats')} 
+              onBlur={handleBlur('woonplaats')} 
+              required 
+            />
+          </div>
         </div>
-        <div className="input-group">
-          <label>Woonplaats *</label>
-          <input type="text" value={form.woonplaats} onChange={handleChange('woonplaats')} onBlur={handleBlur('woonplaats')} required />
-        </div>
-        <div className="input-group">
-          <label>Telefoonnummer *</label>
-          <input type="text" value={form.telefoon} onChange={handleChange('telefoon')} onBlur={handleBlur('telefoon')} required />
-        </div>
-        <div className="input-group">
-          <label>Email *</label>
-          <input type="email" value={form.email} onChange={handleChange('email')} onBlur={handleBlur('email')} required />
+        <div className="inputs-container">
+          <div className="input-group">
+            <label>Telefoonnummer *</label>
+            <input 
+              type="text" 
+              className="input-box"
+              value={form.telefoon} 
+              onChange={handleChange('telefoon')} 
+              onBlur={handleBlur('telefoon')} 
+              required 
+            />
+          </div>
+          <div className="input-group">
+            <label>Email *</label>
+            <input 
+              type="email" 
+              className="input-box"
+              value={form.email} 
+              onChange={handleChange('email')} 
+              onBlur={handleBlur('email')} 
+              required 
+            />
+          </div>
         </div>
       </div>
-      <div className="bottom-section" style={{ marginTop: 32 }}>
+
+      <div className="bottom-section">
+        <div className="info-line">
+          <span className="check-icon"></span>
+          Uitslag binnen: <strong>35 minuten</strong>
+        </div>
         <button className="secondary-button" onClick={onBack}>Terug</button>
-        <button className="submit-button" disabled={!isValid()} onClick={() => onComplete(form)}>
-          Volgende Stap
+        <button 
+          className="submit-button" 
+          disabled={!isValid()} 
+          onClick={() => onComplete(form)}
+        >
+          Financiële gegevens invullen
         </button>
       </div>
     </div>

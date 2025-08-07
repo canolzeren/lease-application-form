@@ -39,42 +39,107 @@ export default function PersonalDetailsExtra({ onBack, onComplete, initialData =
 
   return (
     <div className="lease-form-container">
-      <h2>Persoonsgegevens</h2>
-      <div className="form-section" style={{ maxWidth: 500, margin: '0 auto' }}>
+      <div className="step-header">
+        <h2>Persoonsgegevens</h2>
+        <p className="step-description">Vul uw persoonlijke gegevens in</p>
+      </div>
+
+      <div className="form-section">
         <div className="input-group">
           <label>Aanhef</label>
-          <select value={form.aanhef} onChange={handleChange('aanhef')}>
+          <select 
+            className="vehicle-select"
+            value={form.aanhef} 
+            onChange={handleChange('aanhef')}
+          >
             <option value="">Kies aanhef</option>
             {aanhefOpties.map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
         </div>
         <div className="input-group">
           <label>Voorletters *</label>
-          <input type="text" value={form.voorletters} onChange={handleChange('voorletters')} onBlur={handleBlur('voorletters')} required />
+          <input 
+            type="text" 
+            className="input-box"
+            value={form.voorletters} 
+            onChange={handleChange('voorletters')} 
+            onBlur={handleBlur('voorletters')} 
+            required 
+          />
         </div>
         <div className="input-group">
           <label>Achternaam *</label>
-          <input type="text" value={form.achternaam} onChange={handleChange('achternaam')} onBlur={handleBlur('achternaam')} required />
+          <input 
+            type="text" 
+            className="input-box"
+            value={form.achternaam} 
+            onChange={handleChange('achternaam')} 
+            onBlur={handleBlur('achternaam')} 
+            required 
+          />
         </div>
         <div className="input-group">
           <label>Geboortedatum *</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input type="text" placeholder="DD" maxLength={2} style={{ width: 50 }} value={form.geboortedag} onChange={handleChange('geboortedag')} onBlur={handleBlur('geboortedag')} required />
-            <input type="text" placeholder="MM" maxLength={2} style={{ width: 50 }} value={form.geboortemaand} onChange={handleChange('geboortemaand')} onBlur={handleBlur('geboortemaand')} required />
-            <input type="text" placeholder="JJJJ" maxLength={4} style={{ width: 80 }} value={form.geboortejaar} onChange={handleChange('geboortejaar')} onBlur={handleBlur('geboortejaar')} required />
+          <div className="inputs-container">
+            <input 
+              type="text" 
+              placeholder="DD" 
+              maxLength={2} 
+              className="input-box"
+              style={{ width: '100%' }}
+              value={form.geboortedag} 
+              onChange={handleChange('geboortedag')} 
+              onBlur={handleBlur('geboortedag')} 
+              required 
+            />
+            <input 
+              type="text" 
+              placeholder="MM" 
+              maxLength={2} 
+              className="input-box"
+              style={{ width: '100%' }}
+              value={form.geboortemaand} 
+              onChange={handleChange('geboortemaand')} 
+              onBlur={handleBlur('geboortemaand')} 
+              required 
+            />
+            <input 
+              type="text" 
+              placeholder="JJJJ" 
+              maxLength={4} 
+              className="input-box"
+              style={{ width: '100%' }}
+              value={form.geboortejaar} 
+              onChange={handleChange('geboortejaar')} 
+              onBlur={handleBlur('geboortejaar')} 
+              required 
+            />
           </div>
         </div>
         <div className="input-group">
           <label>Burgerlijke staat</label>
-          <select value={form.burgerlijkeStaat} onChange={handleChange('burgerlijkeStaat')}>
+          <select 
+            className="vehicle-select"
+            value={form.burgerlijkeStaat} 
+            onChange={handleChange('burgerlijkeStaat')}
+          >
             {burgerlijkeStaatOpties.map(opt => <option key={opt} value={opt}>{opt}</option>)}
           </select>
         </div>
       </div>
-      <div className="bottom-section" style={{ marginTop: 32 }}>
+
+      <div className="bottom-section">
+        <div className="info-line">
+          <span className="check-icon"></span>
+          Uitslag binnen: <strong>35 minuten</strong>
+        </div>
         <button className="secondary-button" onClick={onBack}>Terug</button>
-        <button className="submit-button" disabled={!isValid()} onClick={() => onComplete(form)}>
-          Volgende Stap
+        <button 
+          className="submit-button" 
+          disabled={!isValid()} 
+          onClick={() => onComplete(form)}
+        >
+          Contactgegevens invullen
         </button>
       </div>
     </div>

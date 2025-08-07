@@ -8,6 +8,7 @@ import PersonalDetailsExtra from './components/PersonalDetailsExtra.jsx';
 import ContactDetails from './components/ContactDetails.jsx';
 import FinancialDetails from './components/FinancialDetails.jsx';
 import { createClient } from '@supabase/supabase-js';
+import { isSupabaseAvailable } from './lib/supabase';
 
 // Supabase client for CRM data
 const supabase = createClient(
@@ -112,6 +113,79 @@ function SuperForm() {
     setSubmittedData(null);
   };
 
+  const submitPrivateLeaseData = async (data) => {
+    console.log('=== PRIVATE LEASE SUBMISSION START ===');
+    console.log('Private Lease data:', data);
+
+    const submissionData = {
+      lease_type: 'Private Lease',
+      status: 'Nieuw',
+      voornaam: data.personalData?.voorletters || '',
+      achternaam: data.personalData?.achternaam || '',
+      email: data.contactData?.email || '',
+      telefoon: data.contactData?.telefoon || '',
+      voertuig: data.voertuig || 'N/A',
+      maandbedrag: data.maandbedrag || 0,
+      looptijd: data.looptijd || 0,
+      // Private Lease specifieke velden
+      aanhef: data.personalData?.aanhef || '',
+      geboortedatum: `${data.personalData?.geboortedag || ''}-${data.personalData?.geboortemaand || ''}-${data.personalData?.geboortejaar || ''}`,
+      burgerlijke_staat: data.personalData?.burgerlijkeStaat || '',
+      straat: data.contactData?.straat || '',
+      huisnummer: data.contactData?.huisnummer || '',
+      toevoeging: data.contactData?.toevoeging || '',
+      postcode: data.contactData?.postcode || '',
+      woonplaats: data.contactData?.woonplaats || '',
+      dienstverband: data.financialData?.dienstverband || '',
+      beroep: data.financialData?.beroep || '',
+      ingangsdatum: data.financialData?.ingang || '',
+      einddatum: data.financialData?.einde || '',
+      bruto_inkomen: data.financialData?.inkomen || '',
+      woonsituatie: data.financialData?.woonsituatie || '',
+      maandelijkse_woonlast: data.financialData?.woonlast || '',
+      // Voertuiggegevens
+      merk: data.merk || '',
+      type: data.type || '',
+      kenteken: data.kenteken || '',
+      verkoopprijs: data.verkoopprijs || 0,
+      aanbetaling: data.aanbetaling || 0,
+      gewenst_krediet: data.gewenstKrediet || 0
+    };
+
+    console.log('Final Private Lease submission data:', submissionData);
+
+    try {
+      // Simuleer een succesvolle submission (voor demo doeleinden)
+      console.log('✅ Private Lease submission successful (demo mode)');
+      
+      // Als Supabase beschikbaar is, probeer dan ook daar te submitten
+      if (isSupabaseAvailable()) {
+        console.log('🔄 Attempting to save Private Lease to Supabase...');
+        try {
+          const { data: supabaseData, error } = await supabase
+            .from('lease_aanvragen')
+            .insert([submissionData])
+            .select();
+
+          if (error) {
+            console.error('❌ Supabase error:', error.message);
+          } else {
+            console.log('✅ Private Lease data successfully saved to Supabase:', supabaseData);
+          }
+        } catch (supabaseError) {
+          console.error('❌ Supabase submission failed:', supabaseError);
+        }
+      } else {
+        console.log('⚠️ Supabase not configured - Private Lease data not saved to database');
+      }
+
+    } catch (error) {
+      console.error('❌ Error in Private Lease submission:', error);
+    } finally {
+      console.log('=== PRIVATE LEASE SUBMISSION END ===');
+    }
+  };
+
   return (
     <div className="app">
       <div className="header" style={{ padding: '1rem', textAlign: 'center' }}>
@@ -183,8 +257,11 @@ function SuperForm() {
       {currentStep === 3 && leaseData?.leaseType === 'private' && (
         <FinancialDetails 
           onComplete={(data) => {
-            setLeaseData(prev => ({ ...prev, financialData: data }));
+            const finalData = { ...leaseData, financialData: data };
+            setLeaseData(finalData);
             setCurrentStep(4);
+            // Submit Private Lease data to database
+            submitPrivateLeaseData(finalData);
           }} 
           onBack={handleBack}
         />
