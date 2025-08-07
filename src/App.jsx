@@ -116,6 +116,8 @@ function SuperForm() {
   const submitPrivateLeaseData = async (data) => {
     console.log('=== PRIVATE LEASE SUBMISSION START ===');
     console.log('Private Lease data:', data);
+    console.log('Supabase available:', isSupabaseAvailable());
+    console.log('Supabase client:', supabase ? '✅ Created' : '❌ Not created');
 
     const submissionData = {
       lease_type: 'Private Lease',
@@ -161,8 +163,10 @@ function SuperForm() {
       console.log('✅ Private Lease submission successful (demo mode)');
       
       // Als Supabase beschikbaar is, probeer dan ook daar te submitten
-      if (isSupabaseAvailable()) {
+      if (isSupabaseAvailable() && supabase) {
         console.log('🔄 Attempting to save Private Lease to Supabase...');
+        console.log('Submission data:', submissionData);
+        
         try {
           const { data: supabaseData, error } = await supabase
             .from('lease_aanvragen')
@@ -171,20 +175,44 @@ function SuperForm() {
 
           if (error) {
             console.error('❌ Supabase error:', error.message);
+            console.error('❌ Error details:', error);
+            alert(`❌ Database fout: ${error.message}`);
           } else {
             console.log('✅ Private Lease data successfully saved to Supabase:', supabaseData);
+            console.log('✅ Inserted record ID:', supabaseData?.[0]?.id);
           }
         } catch (supabaseError) {
           console.error('❌ Supabase submission failed:', supabaseError);
+          alert(`❌ Database fout: ${supabaseError.message}`);
         }
       } else {
         console.log('⚠️ Supabase not configured - Private Lease data not saved to database');
+        alert('⚠️ Supabase niet geconfigureerd - Data wordt niet opgeslagen');
       }
 
     } catch (error) {
       console.error('❌ Error in Private Lease submission:', error);
     } finally {
       console.log('=== PRIVATE LEASE SUBMISSION END ===');
+      
+      // Test database connectie
+      if (isSupabaseAvailable() && supabase) {
+        console.log('🔄 Testing database connection...');
+        try {
+          const { data: testData, error: testError } = await supabase
+            .from('lease_aanvragen')
+            .select('count')
+            .limit(1);
+          
+          if (testError) {
+            console.error('❌ Database connection test failed:', testError);
+          } else {
+            console.log('✅ Database connection test successful');
+          }
+        } catch (testErr) {
+          console.error('❌ Database connection test error:', testErr);
+        }
+      }
       
       // Toon een melding dat de data is opgeslagen
       alert('✅ Private Lease aanvraag succesvol opgeslagen! Check de CRM voor de nieuwe aanvraag.');
@@ -483,8 +511,27 @@ function CRM() {
         }}>
           <strong>Debug Info:</strong><br/>
           Supabase configured: {isSupabaseAvailable() ? '✅ Ja' : '❌ Nee'}<br/>
+          Supabase client: {supabase ? '✅ Created' : '❌ Not created'}<br/>
           Total requests: {requests.length}<br/>
-          Last fetch: {new Date().toLocaleTimeString()}
+          Last fetch: {new Date().toLocaleTimeString()}<br/>
+          <button 
+            onClick={() => {
+              console.log('🔄 Manual database test...');
+              fetchRequests();
+            }}
+            style={{ 
+              background: '#d846b4', 
+              color: 'white', 
+              padding: '5px 10px', 
+              border: 'none', 
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px',
+              marginTop: '5px'
+            }}
+          >
+            🔍 Test Database
+          </button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2>Aanvragen Overzicht ({requests.length} aanvragen)</h2>
