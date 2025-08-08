@@ -405,6 +405,8 @@ function CRM() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [testing, setTesting] = React.useState(false);
+  const [selectedRequest, setSelectedRequest] = React.useState(null);
+  const [showDetails, setShowDetails] = React.useState(false);
 
   React.useEffect(() => {
     fetchRequests();
@@ -463,6 +465,20 @@ function CRM() {
       default: return '#757575';
     }
   };
+
+  const formatCurrency = (value) => {
+    if (value === null || value === undefined || value === '') return 'N/A';
+    const number = Number(value);
+    if (Number.isNaN(number)) return String(value);
+    return `€${number.toLocaleString('nl-NL')}`;
+  };
+
+  const renderDetailRow = (label, value) => (
+    <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '12px' }}>
+      <div style={{ color: '#6c757d' }}>{label}</div>
+      <div style={{ fontWeight: 600 }}>{value ?? 'N/B'}</div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -654,11 +670,16 @@ function CRM() {
                   <th style={{ padding: '12px', textAlign: 'left' }}>Maandbedrag</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Datum</th>
+                  <th style={{ padding: '12px', textAlign: 'left' }}></th>
                 </tr>
               </thead>
               <tbody>
                 {requests.map((request, index) => (
-                  <tr key={request.id || index} style={{ borderBottom: '1px solid #e9ecef' }}>
+                  <tr 
+                    key={request.id || index} 
+                    style={{ borderBottom: '1px solid #e9ecef', cursor: 'pointer' }}
+                    onClick={() => { setSelectedRequest(request); setShowDetails(true); }}
+                  >
                     <td style={{ padding: '12px' }}>
                       {request.voornaam || request.aanhef || 'N/A'} {request.achternaam || ''}
                     </td>
@@ -698,6 +719,22 @@ function CRM() {
                     <td style={{ padding: '12px' }}>
                       {request.created_at ? formatDate(request.created_at) : 'N/A'}
                     </td>
+                    <td style={{ padding: '12px' }} onClick={(e) => e.stopPropagation()}>
+                      <button 
+                        onClick={() => { setSelectedRequest(request); setShowDetails(true); }}
+                        style={{
+                          background: '#0d6efd',
+                          color: 'white',
+                          padding: '6px 10px',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Details
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -705,6 +742,132 @@ function CRM() {
           </div>
         )}
         
+        {showDetails && selectedRequest && (
+          <div>
+            {/* overlay */}
+            <div 
+              onClick={() => setShowDetails(false)}
+              style={{
+                position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)',
+                zIndex: 998
+              }}
+            />
+            {/* drawer */}
+            <div style={{
+              position: 'fixed', top: 0, right: 0, height: '100%', width: '560px',
+              background: 'white', boxShadow: '-6px 0 16px rgba(0,0,0,0.15)',
+              padding: '24px', zIndex: 999, overflowY: 'auto'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ margin: 0 }}>Aanvraagdetails</h2>
+                <button onClick={() => setShowDetails(false)} style={{
+                  background: 'transparent', border: 'none', fontSize: '22px', cursor: 'pointer'
+                }}>×</button>
+              </div>
+
+              <div style={{ marginTop: '8px', color: '#6c757d' }}>
+                ID: {selectedRequest.id ?? 'N/B'} · {selectedRequest.lease_type || 'Onbekend'} · {selectedRequest.status || 'Nieuw'}
+              </div>
+
+              <div style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+                <span style={{
+                  padding: '4px 8px', borderRadius: '4px', fontWeight: 700,
+                  background: getStatusColor(selectedRequest.status), color: 'white', fontSize: '12px'
+                }}>{selectedRequest.status || 'Nieuw'}</span>
+                <span style={{
+                  padding: '4px 8px', borderRadius: '4px', fontWeight: 700,
+                  background: selectedRequest.lease_type === 'Private Lease' ? '#9c27b0' : selectedRequest.lease_type === 'Financial Lease' ? '#2196f3' : '#ff9800',
+                  color: 'white', fontSize: '12px'
+                }}>{selectedRequest.lease_type || 'Onbekend'}</span>
+              </div>
+
+              {/* Algemene info */}
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ margin: '0 0 12px 0' }}>Algemene informatie</h3>
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  {renderDetailRow('Datum', selectedRequest.created_at ? formatDate(selectedRequest.created_at) : 'N/B')}
+                  {renderDetailRow('Voertuig', `${selectedRequest.voertuig || selectedRequest.merk || 'N/B'} ${selectedRequest.type || ''}`)}
+                  {renderDetailRow('Kenteken', selectedRequest.kenteken || 'N/B')}
+                  {renderDetailRow('Maandbedrag', formatCurrency(selectedRequest.maandbedrag))}
+                  {renderDetailRow('Looptijd', selectedRequest.looptijd ? `${selectedRequest.looptijd} maanden` : 'N/B')}
+                  {renderDetailRow('Aanbetaling', formatCurrency(selectedRequest.aanbetaling))}
+                  {renderDetailRow('Verkoopprijs', formatCurrency(selectedRequest.verkoopprijs))}
+                  {renderDetailRow('Gewenst krediet', formatCurrency(selectedRequest.gewenst_krediet))}
+                </div>
+              </div>
+
+              {/* Persoonlijk */}
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ margin: '0 0 12px 0' }}>Persoonlijke gegevens</h3>
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  {renderDetailRow('Naam', `${selectedRequest.voornaam || selectedRequest.aanhef || 'N/B'} ${selectedRequest.achternaam || ''}`)}
+                  {renderDetailRow('E-mail', selectedRequest.email || 'N/B')}
+                  {renderDetailRow('Telefoon', selectedRequest.telefoon || 'N/B')}
+                  {renderDetailRow('Geboortedatum', selectedRequest.geboortedatum || 'N/B')}
+                  {renderDetailRow('Burgerlijke staat', selectedRequest.burgerlijke_staat || 'N/B')}
+                </div>
+              </div>
+
+              {/* Adres */}
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ margin: '0 0 12px 0' }}>Adres</h3>
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  {renderDetailRow('Straat', selectedRequest.straat || 'N/B')}
+                  {renderDetailRow('Huisnummer', selectedRequest.huisnummer || 'N/B')}
+                  {renderDetailRow('Postcode', selectedRequest.postcode || 'N/B')}
+                  {renderDetailRow('Woonplaats', selectedRequest.woonplaats || 'N/B')}
+                </div>
+              </div>
+
+              {/* Financieel */}
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ margin: '0 0 12px 0' }}>Financiële gegevens</h3>
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  {renderDetailRow('Dienstverband', selectedRequest.dienstverband || 'N/B')}
+                  {renderDetailRow('Beroep', selectedRequest.beroep || 'N/B')}
+                  {renderDetailRow('Ingang dienstverband', selectedRequest.ingangsdatum_dienstverband || 'N/B')}
+                  {renderDetailRow('Bruto inkomen', formatCurrency(selectedRequest.bruto_inkomen))}
+                  {renderDetailRow('Woonsituatie', selectedRequest.woonsituatie || 'N/B')}
+                  {renderDetailRow('Maandelijkse woonlasten', formatCurrency(selectedRequest.maandelijkse_woonlasten))}
+                </div>
+              </div>
+
+              {/* Extra producten indien aanwezig */}
+              {(selectedRequest.geselecteerde_producten || selectedRequest.extra_producten_kosten) && (
+                <div style={{ marginTop: '24px' }}>
+                  <h3 style={{ margin: '0 0 12px 0' }}>Extra producten</h3>
+                  {selectedRequest.geselecteerde_producten && (
+                    <div style={{
+                      background: '#f8f9fa', padding: '10px', borderRadius: '6px', fontSize: '13px'
+                    }}>
+                      <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                        {JSON.stringify(selectedRequest.geselecteerde_producten, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                  {selectedRequest.extra_producten_kosten && (
+                    <div style={{ marginTop: '10px', display: 'grid', gap: '10px' }}>
+                      {renderDetailRow('Eenmalige kosten', formatCurrency(selectedRequest.extra_producten_kosten?.eenmaligeKosten))}
+                      {renderDetailRow('Maandelijkse kosten', formatCurrency(selectedRequest.extra_producten_kosten?.maandelijkseKosten))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div style={{ marginTop: '24px', display: 'flex', gap: '8px' }}>
+                <button onClick={() => setShowDetails(false)} style={{
+                  background: '#6c757d', color: 'white', border: 'none', padding: '10px 14px',
+                  borderRadius: '6px', cursor: 'pointer'
+                }}>Sluiten</button>
+                <button onClick={() => navigator.clipboard.writeText(JSON.stringify(selectedRequest, null, 2))} style={{
+                  background: '#0d6efd', color: 'white', border: 'none', padding: '10px 14px',
+                  borderRadius: '6px', cursor: 'pointer'
+                }}>Kopieer JSON</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Debug sectie voor ontwikkelaars */}
         <details style={{ marginTop: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px' }}>
           <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>🔧 Debug: Ruwe Data (Klik om te tonen)</summary>
