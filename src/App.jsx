@@ -119,40 +119,48 @@ function SuperForm() {
     console.log('Supabase available:', isSupabaseAvailable());
     console.log('Supabase client:', supabase ? '✅ Created' : '❌ Not created');
 
+    // Normaliseer datums naar ISO (YYYY-MM-DD)
+    const pad2 = (n) => (n ? String(n).padStart(2, '0') : '');
+    const birthYear = data.personalData?.geboortejaar || '';
+    const birthMonth = pad2(data.personalData?.geboortemaand);
+    const birthDay = pad2(data.personalData?.geboortedag);
+    const geboortedatumISO = birthYear && birthMonth && birthDay
+      ? `${birthYear}-${birthMonth}-${birthDay}`
+      : '';
+
     const submissionData = {
+      // Verplichte/algemene velden
       lease_type: 'Private Lease',
       status: 'Nieuw',
+      voertuig: data.voertuig || 'N/A',
+      aanbetaling: data.aanbetaling || 0,
+      looptijd: data.looptijd || 0,
+      maandbedrag: data.maandbedrag || 0,
+
+      // Contact/persoonlijke gegevens
       voornaam: data.personalData?.voorletters || '',
       achternaam: data.personalData?.achternaam || '',
       email: data.contactData?.email || '',
       telefoon: data.contactData?.telefoon || '',
-      voertuig: data.voertuig || 'N/A',
-      maandbedrag: data.maandbedrag || 0,
-      looptijd: data.looptijd || 0,
-      // Private Lease specifieke velden
       aanhef: data.personalData?.aanhef || '',
-      geboortedatum: `${data.personalData?.geboortedag || ''}-${data.personalData?.geboortemaand || ''}-${data.personalData?.geboortejaar || ''}`,
+      geboortedatum: geboortedatumISO,
       burgerlijke_staat: data.personalData?.burgerlijkeStaat || '',
+
+      // Adres
       straat: data.contactData?.straat || '',
       huisnummer: data.contactData?.huisnummer || '',
-      toevoeging: data.contactData?.toevoeging || '',
       postcode: data.contactData?.postcode || '',
       woonplaats: data.contactData?.woonplaats || '',
+
+      // Financieel (kolomnamen conform schema)
       dienstverband: data.financialData?.dienstverband || '',
       beroep: data.financialData?.beroep || '',
-      ingangsdatum: data.financialData?.ingang || '',
-      // einddatum: data.financialData?.einde || '', // REMOVED - column doesn't exist in database
-      bruto_inkomen: data.financialData?.inkomen || '',
+      ingangsdatum_dienstverband: data.financialData?.ingang || '',
+      bruto_inkomen: data.financialData?.inkomen || 0,
       woonsituatie: data.financialData?.woonsituatie || '',
-      maandelijkse_woonlast: data.financialData?.woonlast || '',
-      // Voertuiggegevens
-      merk: data.merk || '',
-      type: data.type || '',
-      kenteken: data.kenteken || '',
-      verkoopprijs: data.verkoopprijs || 0,
-      aanbetaling: data.aanbetaling || 0,
-      gewenst_krediet: data.gewenstKrediet || 0,
-      // Timestamp voor correcte sortering
+      maandelijkse_woonlasten: data.financialData?.woonlast || 0,
+
+      // Metadata
       created_at: new Date().toISOString()
     };
 
