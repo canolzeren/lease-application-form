@@ -484,7 +484,7 @@ function CRM() {
     return (
       <div className="app">
         <div className="header">
-          <h1>CRM Dashboard (v3)</h1>
+          <h1>CRM Dashboard (v4)</h1>
           <p>Beheer alle lease aanvragen</p>
         </div>
         <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -499,7 +499,7 @@ function CRM() {
     return (
       <div className="app">
         <div className="header">
-          <h1>CRM Dashboard (v3)</h1>
+          <h1>CRM Dashboard (v4)</h1>
           <p>Beheer alle lease aanvragen</p>
         </div>
         <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -526,7 +526,7 @@ function CRM() {
   return (
     <div className="app">
       <div className="header">
-        <h1>CRM Dashboard (v3)</h1>
+        <h1>CRM Dashboard (v4)</h1>
         <p>Beheer alle lease aanvragen</p>
       </div>
       <div className="crm-content">
