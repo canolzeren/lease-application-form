@@ -905,10 +905,10 @@ body {
 .btn:disabled { cursor: not-allowed; opacity: 0.6; }
 .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-.btn-primary { background: #d846b4; color: #fff; }
-.btn-success { background: #28a745; color: #fff; }
+.btn-primary { background: var(--primary); color: var(--primary-foreground); }
+.btn-success { background: var(--chart-3); color: #fff; }
 .btn-neutral { background: var(--secondary); color: var(--secondary-foreground); }
-.btn-info { background: #0d6efd; color: #fff; }
+.btn-info { background: var(--chart-2); color: #fff; }
 .btn-muted { background: #6c757d; color: #fff; }
 
 .crm-table {
@@ -937,14 +937,15 @@ body {
 }
 
 .badge-status { background: #757575; }
-.badge-status.Nieuw { background: #2196F3; }
-.badge-status.In\ behandeling { background: #FF9800; }
-.badge-status.Goedgekeurd { background: #4CAF50; }
-.badge-status.Afgewezen { background: #F44336; }
+.badge-status.Nieuw { background: var(--chart-1); }
+.badge-status.In\ behandeling { background: var(--chart-4); }
+.badge-status.Goedgekeurd { background: var(--chart-3); }
+.badge-status.Afgewezen { background: var(--destructive); }
 
-.badge-type { background: #9c27b0; }
-.badge-type.Financial\ Lease { background: #2196f3; }
-.badge-type.Operational\ Lease { background: #ff9800; }
+.badge-type { background: var(--primary); }
+.badge-type.Private\ Lease { background: var(--primary); }
+.badge-type.Financial\ Lease { background: var(--chart-2); }
+.badge-type.Operational\ Lease { background: var(--chart-4); }
 
 .crm-overlay {
   position: fixed;
