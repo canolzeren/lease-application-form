@@ -617,15 +617,15 @@ function CRM() {
           <div className="crm-card">
             <table className="crm-table">
               <thead>
-                <tr style={{ borderBottom: '2px solid #e9ecef' }}>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Naam</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Email</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Lease Type</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Voertuig</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Maandbedrag</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Datum</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}></th>
+                <tr>
+                  <th>Naam</th>
+                  <th>Email</th>
+                  <th>Lease Type</th>
+                  <th>Voertuig</th>
+                  <th>Maandbedrag</th>
+                  <th>Status</th>
+                  <th>Datum</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -635,37 +635,29 @@ function CRM() {
                     className="crm-row"
                     onClick={() => { setSelectedRequest(request); setShowDetails(true); }}
                   >
-                    <td style={{ padding: '12px' }}>
+                    <td>
                       {request.voornaam || request.aanhef || 'N/A'} {request.achternaam || ''}
                     </td>
-                    <td style={{ padding: '12px' }}>{request.email || 'N/A'}</td>
-                    <td style={{ padding: '12px' }}>
-                      <span style={{
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        fontSize: '11px',
-                        fontWeight: 'bold',
-                        background: request.lease_type === 'Private Lease' ? '#9c27b0' : 
-                                   request.lease_type === 'Financial Lease' ? '#2196f3' : '#ff9800',
-                        color: 'white'
-                      }}>
+                    <td>{request.email || 'N/A'}</td>
+                    <td>
+                      <span className={`badge badge-type ${request.lease_type?.replace(/\s/g, '\\ ') || ''}`}>
                         {request.lease_type || 'Onbekend'}
                       </span>
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td>
                       {request.voertuig || request.merk || 'N/A'}
                       {request.type && ` ${request.type}`}
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td>
                       {request.maandbedrag ? `€${request.maandbedrag.toLocaleString()}` : 'N/A'}
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td>
                       <span className={`badge badge-status ${request.status || ''}`}>{request.status || 'Nieuw'}</span>
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td>
                       {request.created_at ? formatDate(request.created_at) : 'N/A'}
                     </td>
-                    <td style={{ padding: '12px' }} onClick={(e) => e.stopPropagation()}>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <button 
                         onClick={() => { setSelectedRequest(request); setShowDetails(true); }}
                         className="btn btn-info"
