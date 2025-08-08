@@ -869,12 +869,18 @@ body {
   padding: 20px;
 }
 
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .crm-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  padding: 16px;
+  border-radius: calc(var(--radius) + 2px);
+  box-shadow: var(--shadow-xs);
+  padding: 18px;
+  margin-bottom: 14px;
 }
 
 .crm-debug {
@@ -905,10 +911,10 @@ body {
 .btn:disabled { cursor: not-allowed; opacity: 0.6; }
 .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
-.btn-primary { background: var(--primary); color: var(--primary-foreground); }
-.btn-success { background: var(--chart-3); color: #fff; }
-.btn-neutral { background: var(--secondary); color: var(--secondary-foreground); }
-.btn-info { background: var(--chart-2); color: #fff; }
+.btn-primary { background: var(--primary); color: var(--primary-foreground); border: 1px solid var(--border); }
+.btn-success { background: var(--secondary); color: #1b5e20; border: 1px solid rgba(76,175,80,.35); }
+.btn-neutral { background: var(--secondary); color: var(--secondary-foreground); border: 1px solid var(--border); }
+.btn-info { background: var(--secondary); color: #0d6efd; border: 1px solid rgba(13,110,253,.35); }
 .btn-muted { background: #6c757d; color: #fff; }
 
 .crm-table {
@@ -922,30 +928,35 @@ body {
   border-bottom: 2px solid var(--border);
   color: var(--muted-foreground);
   font-weight: 600;
+  background: var(--secondary);
 }
 
 .crm-table tbody td { padding: 12px; border-bottom: 1px solid var(--border); }
+.crm-table tbody tr:nth-child(even) { background: var(--secondary); }
+.crm-table tbody tr:hover { background: var(--accent); }
 .crm-row { cursor: pointer; }
 
 .badge {
   display: inline-block;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  color: #fff;
+  color: var(--foreground);
+  background: var(--secondary);
+  border: 1px solid var(--border);
 }
 
-.badge-status { background: #757575; }
-.badge-status.Nieuw { background: var(--chart-1); }
-.badge-status.In\ behandeling { background: var(--chart-4); }
-.badge-status.Goedgekeurd { background: var(--chart-3); }
-.badge-status.Afgewezen { background: var(--destructive); }
+.badge-status { color: #424242; background: var(--secondary); }
+.badge-status.Nieuw { color: #1976d2; background: rgba(25,118,210,.12); border-color: rgba(25,118,210,.35); }
+.badge-status.In\ behandeling { color: #ef6c00; background: rgba(239,108,0,.12); border-color: rgba(239,108,0,.35); }
+.badge-status.Goedgekeurd { color: #2e7d32; background: rgba(46,125,50,.12); border-color: rgba(46,125,50,.35); }
+.badge-status.Afgewezen { color: #c62828; background: rgba(198,40,40,.12); border-color: rgba(198,40,40,.35); }
 
-.badge-type { background: var(--primary); }
-.badge-type.Private\ Lease { background: var(--primary); }
-.badge-type.Financial\ Lease { background: var(--chart-2); }
-.badge-type.Operational\ Lease { background: var(--chart-4); }
+.badge-type { color: #6a1b9a; background: rgba(106,27,154,.12); border-color: rgba(106,27,154,.35); }
+.badge-type.Private\ Lease { color: #6a1b9a; background: rgba(106,27,154,.12); border-color: rgba(106,27,154,.35); }
+.badge-type.Financial\ Lease { color: #0d6efd; background: rgba(13,110,253,.12); border-color: rgba(13,110,253,.35); }
+.badge-type.Operational\ Lease { color: #ef6c00; background: rgba(239,108,0,.12); border-color: rgba(239,108,0,.35); }
 
 .crm-overlay {
   position: fixed;
@@ -964,6 +975,7 @@ body {
   z-index: 999;
   overflow-y: auto;
   border-left: 1px solid var(--border);
+  border-top-left-radius: calc(var(--radius) + 6px);
 }
 
 .crm-section { margin-top: 24px; }

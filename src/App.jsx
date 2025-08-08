@@ -529,7 +529,7 @@ function CRM() {
         <h1>CRM Dashboard (v4)</h1>
         <p>Beheer alle lease aanvragen</p>
       </div>
-      <div className="crm-content">
+      <div className="crm-content container">
         <div className="crm-card crm-debug">
           <strong>🔧 Debug Info:</strong><br/>
           Supabase configured: {isSupabaseAvailable() ? '✅ Ja' : '❌ Nee'}<br/>
