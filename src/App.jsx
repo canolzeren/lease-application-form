@@ -141,7 +141,7 @@ function SuperForm() {
       dienstverband: data.financialData?.dienstverband || '',
       beroep: data.financialData?.beroep || '',
       ingangsdatum: data.financialData?.ingang || '',
-      einddatum: data.financialData?.einde || '',
+      // einddatum: data.financialData?.einde || '', // REMOVED - column doesn't exist in database
       bruto_inkomen: data.financialData?.inkomen || '',
       woonsituatie: data.financialData?.woonsituatie || '',
       maandelijkse_woonlast: data.financialData?.woonlast || '',
