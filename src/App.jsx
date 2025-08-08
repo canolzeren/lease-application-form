@@ -72,9 +72,8 @@ function SuperForm() {
   const [leaseData, setLeaseData] = React.useState(null);
   const [submittedData, setSubmittedData] = React.useState(null);
 
-  const stepNames = leaseData?.leaseType === 'private' 
-    ? ['Voertuig Selectie', 'Persoonlijke Gegevens', 'Contactgegevens', 'Financiële Gegevens']
-    : ['Voertuig Selectie', 'Extra Opties', 'Persoonlijke Gegevens'];
+  // Simpele voortgangsweergave: alleen stapnummers (geen labels)
+  const totalSteps = leaseData?.leaseType === 'private' ? 4 : 3;
 
   const handleLeaseComplete = (data) => {
     setLeaseData(data);
@@ -237,7 +236,7 @@ function SuperForm() {
       {currentStep < 4 && (
         <div className="progress-container">
           <div className="progress-bar">
-            {stepNames.map((stepName, index) => (
+            {Array.from({ length: totalSteps }).map((_, index) => (
               <div key={index} className={`progress-step ${index <= currentStep ? 'completed' : ''}`}>
                 <div className="progress-icon">
                   {index < currentStep ? (
@@ -248,7 +247,7 @@ function SuperForm() {
                     <div className="progress-step-number">{index + 1}</div>
                   )}
                 </div>
-                <span className="progress-label">{stepName}</span>
+                {/* Labels verwijderd voor eenvoudige voortgang */}
               </div>
             ))}
           </div>
