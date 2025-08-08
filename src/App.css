@@ -502,8 +502,8 @@ body {
 
 .check-icon {
   display: inline-block;
-  width: 20px;
-  height: 20px;
+    width: 20px;
+    height: 20px;
   border-radius: 50%;
   background: var(--primary);
   position: relative;
@@ -623,11 +623,11 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 60vh;
-  padding: 2rem;
+    padding: 2rem;
 }
 
 .success-content {
-  text-align: center;
+    text-align: center;
   max-width: 500px;
 }
 
@@ -640,7 +640,7 @@ body {
 
 .success-content p {
   color: var(--muted-foreground);
-  margin-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .summary {
@@ -653,9 +653,9 @@ body {
 
 .summary h3 {
   font-size: 0.875rem;
-  font-weight: 600;
+    font-weight: 600;
   color: var(--foreground);
-  margin-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
 }
 
 .summary-grid {
@@ -665,7 +665,7 @@ body {
 }
 
 .summary-grid > div {
-  display: flex;
+    display: flex;
   justify-content: space-between;
 }
 
@@ -674,8 +674,8 @@ body {
   color: var(--secondary-foreground);
   padding: 0.75rem 1.5rem;
   border-radius: var(--radius);
-  border: none;
-  cursor: pointer;
+    border: none;
+    cursor: pointer;
   font-weight: 500;
   margin-top: 1rem;
 }
@@ -688,7 +688,7 @@ body {
     padding: 1rem;
   }
   
-  .inputs-container {
+.inputs-container {
     grid-template-columns: 1fr;
   }
   
@@ -740,19 +740,19 @@ body {
   
   .summary-details {
     font-size: 1rem;
-  }
-  
-  .submit-button {
+}
+
+.submit-button {
     width: 100%;
     margin-top: 0.5rem;
     padding: 1rem 2rem;
     font-size: 1rem;
-  }
+}
   
-  .bottom-section {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
+    .bottom-section {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
   
   .progress-container {
     margin: 0.5rem;
@@ -861,3 +861,113 @@ body {
   border-radius: var(--radius);
   margin-top: 0.5rem;
 }
+
+/* ===================== */
+/* CRM Styles            */
+/* ===================== */
+.crm-content {
+  padding: 20px;
+}
+
+.crm-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+}
+
+.crm-debug {
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: 14px;
+}
+
+.crm-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn:disabled { cursor: not-allowed; opacity: 0.6; }
+.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+.btn-primary { background: #d846b4; color: #fff; }
+.btn-success { background: #28a745; color: #fff; }
+.btn-neutral { background: var(--secondary); color: var(--secondary-foreground); }
+.btn-info { background: #0d6efd; color: #fff; }
+.btn-muted { background: #6c757d; color: #fff; }
+
+.crm-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.crm-table thead th {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  color: var(--muted-foreground);
+  font-weight: 600;
+}
+
+.crm-table tbody td { padding: 12px; border-bottom: 1px solid var(--border); }
+.crm-row { cursor: pointer; }
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.badge-status { background: #757575; }
+.badge-status.Nieuw { background: #2196F3; }
+.badge-status.In\ behandeling { background: #FF9800; }
+.badge-status.Goedgekeurd { background: #4CAF50; }
+.badge-status.Afgewezen { background: #F44336; }
+
+.badge-type { background: #9c27b0; }
+.badge-type.Financial\ Lease { background: #2196f3; }
+.badge-type.Operational\ Lease { background: #ff9800; }
+
+.crm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 998;
+}
+
+.crm-drawer {
+  position: fixed;
+  top: 0; right: 0;
+  height: 100%; width: 560px;
+  background: var(--card);
+  box-shadow: -6px 0 16px rgba(0,0,0,0.15);
+  padding: 24px;
+  z-index: 999;
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+}
+
+.crm-section { margin-top: 24px; }
+.crm-section h3 { margin: 0 0 12px 0; font-size: 1rem; }
+.crm-detail-grid { display: grid; gap: 10px; }
+.crm-detail-row { display: grid; grid-template-columns: 180px 1fr; gap: 12px; }
+.crm-detail-label { color: #6c757d; }
+.crm-detail-value { font-weight: 600; }

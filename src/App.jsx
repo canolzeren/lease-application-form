@@ -529,14 +529,8 @@ function CRM() {
         <h1>CRM Dashboard (v3)</h1>
         <p>Beheer alle lease aanvragen</p>
       </div>
-      <div style={{ padding: '20px' }}>
-        <div style={{ 
-          background: '#f8f9fa', 
-          padding: '15px', 
-          borderRadius: '8px', 
-          marginBottom: '20px',
-          fontSize: '14px'
-        }}>
+      <div className="crm-content">
+        <div className="crm-card crm-debug">
           <strong>🔧 Debug Info:</strong><br/>
           Supabase configured: {isSupabaseAvailable() ? '✅ Ja' : '❌ Nee'}<br/>
           Supabase client: {supabase ? '✅ Created' : '❌ Not created'}<br/>
@@ -557,17 +551,7 @@ function CRM() {
               }
             }}
             disabled={testing}
-            style={{ 
-              background: testing ? '#6c757d' : '#d846b4', 
-              color: 'white', 
-              padding: '8px 12px', 
-              border: 'none', 
-              borderRadius: '4px',
-              cursor: testing ? 'not-allowed' : 'pointer',
-              fontSize: '12px',
-              marginTop: '5px',
-              fontWeight: 'bold'
-            }}
+            className={`btn ${testing ? 'btn-muted' : 'btn-primary'}`}
           >
             {testing ? '⏳ Testing...' : '🔄 Test Database'}
           </button>
@@ -610,57 +594,28 @@ function CRM() {
               }
             }}
             disabled={testing}
-            style={{ 
-              background: testing ? '#6c757d' : '#28a745', 
-              color: 'white', 
-              padding: '8px 12px', 
-              border: 'none', 
-              borderRadius: '4px',
-              cursor: testing ? 'not-allowed' : 'pointer',
-              fontSize: '12px',
-              marginTop: '5px',
-              marginLeft: '5px',
-              fontWeight: 'bold'
-            }}
+            className={`btn ${testing ? 'btn-muted' : 'btn-success'}`}
           >
             {testing ? '⏳ Testing...' : '🧪 Add Test Record'}
           </button>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div className="crm-toolbar">
           <h2>Aanvragen Overzicht ({requests.length} aanvragen)</h2>
           <button 
             onClick={fetchRequests}
-            style={{ 
-              background: '#d846b4', 
-              color: 'white', 
-              padding: '10px 20px', 
-              border: 'none', 
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
+            className="btn btn-primary"
           >
             🔄 Vernieuwen
           </button>
         </div>
         {requests.length === 0 ? (
-          <div style={{ 
-            background: 'white', 
-            borderRadius: '8px', 
-            padding: '40px', 
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            textAlign: 'center'
-          }}>
+          <div className="crm-card" style={{ textAlign: 'center', padding: '40px' }}>
             <h3>Geen aanvragen gevonden</h3>
             <p>Er zijn nog geen lease aanvragen ingediend.</p>
           </div>
         ) : (
-          <div style={{ 
-            background: 'white', 
-            borderRadius: '8px', 
-            padding: '20px', 
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)' 
-          }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="crm-card">
+            <table className="crm-table">
               <thead>
                 <tr style={{ borderBottom: '2px solid #e9ecef' }}>
                   <th style={{ padding: '12px', textAlign: 'left' }}>Naam</th>
@@ -677,7 +632,7 @@ function CRM() {
                 {requests.map((request, index) => (
                   <tr 
                     key={request.id || index} 
-                    style={{ borderBottom: '1px solid #e9ecef', cursor: 'pointer' }}
+                    className="crm-row"
                     onClick={() => { setSelectedRequest(request); setShowDetails(true); }}
                   >
                     <td style={{ padding: '12px' }}>
@@ -705,16 +660,7 @@ function CRM() {
                       {request.maandbedrag ? `€${request.maandbedrag.toLocaleString()}` : 'N/A'}
                     </td>
                     <td style={{ padding: '12px' }}>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        background: getStatusColor(request.status),
-                        color: 'white'
-                      }}>
-                        {request.status || 'Nieuw'}
-                      </span>
+                      <span className={`badge badge-status ${request.status || ''}`}>{request.status || 'Nieuw'}</span>
                     </td>
                     <td style={{ padding: '12px' }}>
                       {request.created_at ? formatDate(request.created_at) : 'N/A'}
@@ -722,15 +668,8 @@ function CRM() {
                     <td style={{ padding: '12px' }} onClick={(e) => e.stopPropagation()}>
                       <button 
                         onClick={() => { setSelectedRequest(request); setShowDetails(true); }}
-                        style={{
-                          background: '#0d6efd',
-                          color: 'white',
-                          padding: '6px 10px',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          cursor: 'pointer'
-                        }}
+                        className="btn btn-info"
+                        style={{ padding: '6px 10px' }}
                       >
                         Details
                       </button>
@@ -745,19 +684,9 @@ function CRM() {
         {showDetails && selectedRequest && (
           <div>
             {/* overlay */}
-            <div 
-              onClick={() => setShowDetails(false)}
-              style={{
-                position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)',
-                zIndex: 998
-              }}
-            />
+            <div className="crm-overlay" onClick={() => setShowDetails(false)} />
             {/* drawer */}
-            <div style={{
-              position: 'fixed', top: 0, right: 0, height: '100%', width: '560px',
-              background: 'white', boxShadow: '-6px 0 16px rgba(0,0,0,0.15)',
-              padding: '24px', zIndex: 999, overflowY: 'auto'
-            }}>
+            <div className="crm-drawer">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{ margin: 0 }}>Aanvraagdetails</h2>
                 <button onClick={() => setShowDetails(false)} style={{
@@ -782,9 +711,9 @@ function CRM() {
               </div>
 
               {/* Algemene info */}
-              <div style={{ marginTop: '24px' }}>
-                <h3 style={{ margin: '0 0 12px 0' }}>Algemene informatie</h3>
-                <div style={{ display: 'grid', gap: '10px' }}>
+              <div className="crm-section">
+                <h3>Algemene informatie</h3>
+                <div className="crm-detail-grid">
                   {renderDetailRow('Datum', selectedRequest.created_at ? formatDate(selectedRequest.created_at) : 'N/B')}
                   {renderDetailRow('Voertuig', `${selectedRequest.voertuig || selectedRequest.merk || 'N/B'} ${selectedRequest.type || ''}`)}
                   {renderDetailRow('Kenteken', selectedRequest.kenteken || 'N/B')}
@@ -797,9 +726,9 @@ function CRM() {
               </div>
 
               {/* Persoonlijk */}
-              <div style={{ marginTop: '24px' }}>
-                <h3 style={{ margin: '0 0 12px 0' }}>Persoonlijke gegevens</h3>
-                <div style={{ display: 'grid', gap: '10px' }}>
+              <div className="crm-section">
+                <h3>Persoonlijke gegevens</h3>
+                <div className="crm-detail-grid">
                   {renderDetailRow('Naam', `${selectedRequest.voornaam || selectedRequest.aanhef || 'N/B'} ${selectedRequest.achternaam || ''}`)}
                   {renderDetailRow('E-mail', selectedRequest.email || 'N/B')}
                   {renderDetailRow('Telefoon', selectedRequest.telefoon || 'N/B')}
@@ -809,9 +738,9 @@ function CRM() {
               </div>
 
               {/* Adres */}
-              <div style={{ marginTop: '24px' }}>
-                <h3 style={{ margin: '0 0 12px 0' }}>Adres</h3>
-                <div style={{ display: 'grid', gap: '10px' }}>
+              <div className="crm-section">
+                <h3>Adres</h3>
+                <div className="crm-detail-grid">
                   {renderDetailRow('Straat', selectedRequest.straat || 'N/B')}
                   {renderDetailRow('Huisnummer', selectedRequest.huisnummer || 'N/B')}
                   {renderDetailRow('Postcode', selectedRequest.postcode || 'N/B')}
@@ -820,9 +749,9 @@ function CRM() {
               </div>
 
               {/* Financieel */}
-              <div style={{ marginTop: '24px' }}>
-                <h3 style={{ margin: '0 0 12px 0' }}>Financiële gegevens</h3>
-                <div style={{ display: 'grid', gap: '10px' }}>
+              <div className="crm-section">
+                <h3>Financiële gegevens</h3>
+                <div className="crm-detail-grid">
                   {renderDetailRow('Dienstverband', selectedRequest.dienstverband || 'N/B')}
                   {renderDetailRow('Beroep', selectedRequest.beroep || 'N/B')}
                   {renderDetailRow('Ingang dienstverband', selectedRequest.ingangsdatum_dienstverband || 'N/B')}
