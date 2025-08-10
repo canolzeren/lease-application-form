@@ -838,100 +838,116 @@ function CRM() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '20px' }}>
-          {/* Tabel aan de linkerkant */}
-          <div style={{ flex: 1, overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-              <thead>
-                <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>ID</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Voornaam</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Achternaam</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Email</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Telefoon</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Merk</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Model</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Lease Type</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Status</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Aangemaakt</th>
-                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Acties</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRequests.map(renderRequestRow)}
-              </tbody>
-            </table>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+            <thead>
+              <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>ID</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Voornaam</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Achternaam</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Email</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Telefoon</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Merk</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Model</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Lease Type</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Status</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Aangemaakt</th>
+                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Acties</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRequests.map(renderRequestRow)}
+            </tbody>
+          </table>
 
-            {filteredRequests.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-                <p>Geen lease aanvragen gevonden.</p>
-              </div>
-            )}
-          </div>
+          {filteredRequests.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+              <p>Geen lease aanvragen gevonden.</p>
+            </div>
+          )}
+        </div>
 
-          {/* Detailweergave aan de rechterkant */}
-          {selectedRequest && (
+        {/* Slide-in detail panel van rechts */}
+        {selectedRequest && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: '450px',
+            background: 'white',
+            borderLeft: '2px solid #007bff',
+            boxShadow: '-5px 0 15px rgba(0,0,0,0.1)',
+            zIndex: 1000,
+            overflowY: 'auto',
+            transform: 'translateX(0)',
+            transition: 'transform 0.3s ease-in-out'
+          }}>
             <div style={{
-              width: '400px',
-              background: 'white',
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              padding: '20px',
-              height: 'fit-content',
               position: 'sticky',
-              top: '20px'
+              top: 0,
+              background: 'white',
+              borderBottom: '1px solid #eee',
+              padding: '20px',
+              zIndex: 1
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 style={{ margin: 0 }}>Details van Aanvraag #{selectedRequest.id}</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0, color: '#007bff' }}>Details van Aanvraag #{selectedRequest.id}</h3>
                 <button
                   onClick={() => setSelectedRequest(null)}
                   style={{
                     background: 'none',
                     border: 'none',
-                    fontSize: '20px',
+                    fontSize: '24px',
                     cursor: 'pointer',
                     color: '#666',
-                    padding: '0',
-                    width: '24px',
-                    height: '24px',
+                    padding: '8px',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    transition: 'background-color 0.2s'
                   }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                 >
                   ×
                 </button>
               </div>
-              
-              <div style={{ marginBottom: '20px' }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>Persoonlijke Gegevens</h4>
-                <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '6px' }}>
-                  <p style={{ margin: '5px 0' }}><strong>Naam:</strong> {selectedRequest.voornaam} {selectedRequest.achternaam}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Email:</strong> {selectedRequest.email}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Telefoon:</strong> {selectedRequest.telefoon}</p>
+            </div>
+            
+            <div style={{ padding: '0 20px 20px 20px' }}>
+              <div style={{ marginBottom: '25px' }}>
+                <h4 style={{ margin: '0 0 15px 0', color: '#333', fontSize: '16px' }}>Persoonlijke Gegevens</h4>
+                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', border: '1px solid #e9ecef' }}>
+                  <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Naam:</strong> {selectedRequest.voornaam} {selectedRequest.achternaam}</p>
+                  <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Email:</strong> {selectedRequest.email}</p>
+                  <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Telefoon:</strong> {selectedRequest.telefoon}</p>
                 </div>
               </div>
               
-              <div style={{ marginBottom: '20px' }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>Voertuig</h4>
-                <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '6px' }}>
-                  <p style={{ margin: '5px 0' }}><strong>Merk:</strong> {selectedRequest.merk}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Model:</strong> {selectedRequest.model}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Type:</strong> {selectedRequest.voertuig}</p>
+              <div style={{ marginBottom: '25px' }}>
+                <h4 style={{ margin: '0 0 15px 0', color: '#333', fontSize: '16px' }}>Voertuig</h4>
+                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', border: '1px solid #e9ecef' }}>
+                  <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Merk:</strong> {selectedRequest.merk}</p>
+                  <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Model:</strong> {selectedRequest.model}</p>
+                  <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Type:</strong> {selectedRequest.voertuig}</p>
                 </div>
               </div>
               
-              <div style={{ marginBottom: '20px' }}>
-                <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>Lease Details</h4>
-                <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '6px' }}>
-                  <p style={{ margin: '5px 0' }}><strong>Type:</strong> {selectedRequest.lease_type}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Status:</strong> {selectedRequest.status}</p>
-                  <p style={{ margin: '5px 0' }}><strong>Aangemaakt:</strong> {selectedRequest.created_at}</p>
+              <div style={{ marginBottom: '25px' }}>
+                <h4 style={{ margin: '0 0 15px 0', color: '#333', fontSize: '16px' }}>Lease Details</h4>
+                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', border: '1px solid #e9ecef' }}>
+                  <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Type:</strong> {selectedRequest.lease_type}</p>
+                  <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Status:</strong> {selectedRequest.status}</p>
+                  <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Aangemaakt:</strong> {selectedRequest.created_at}</p>
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
