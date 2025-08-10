@@ -10,6 +10,7 @@ import {
   FilterListIcon,
   SearchIcon
 } from '@mui/icons-material';
+import './LeaseOverview.css';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -107,61 +108,49 @@ export default function LeaseOverview() {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="lease-overview-container">
       {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, #d846b4 0%, #c2185b 100%)',
-        color: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        marginBottom: '20px'
-      }}>
-        <h1 style={{ margin: 0, fontSize: '24px' }}>Lease Aanvragen Overzicht</h1>
-        <p style={{ margin: '10px 0 0 0', opacity: 0.9 }}>
+      <div className="lease-overview-header">
+        <h1 className="lease-overview-title">Lease Aanvragen Overzicht</h1>
+        <p className="lease-overview-subtitle">
           Beheer alle lease aanvragen en hun status
         </p>
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
-        <div style={{ background: '#E3F2FD', padding: '15px', borderRadius: '8px', textAlign: 'center' }}>
-          <h3 style={{ margin: 0, color: '#1976D2' }}>{leaseRequests.length}</h3>
-          <p style={{ margin: '5px 0 0 0', color: '#666' }}>Totaal Aanvragen</p>
+      <div className="lease-overview-stats">
+        <div className="stat-card stat-total">
+          <h3 className="stat-number">{leaseRequests.length}</h3>
+          <p className="stat-label">Totaal Aanvragen</p>
         </div>
-        <div style={{ background: '#FFF3E0', padding: '15px', borderRadius: '8px', textAlign: 'center' }}>
-          <h3 style={{ margin: 0, color: '#F57C00' }}>
+        <div className="stat-card stat-new">
+          <h3 className="stat-number">
             {leaseRequests.filter(r => r.status === 'Nieuw').length}
           </h3>
-          <p style={{ margin: '5px 0 0 0', color: '#666' }}>Nieuwe Aanvragen</p>
+          <p className="stat-label">Nieuwe Aanvragen</p>
         </div>
-        <div style={{ background: '#E8F5E8', padding: '15px', borderRadius: '8px', textAlign: 'center' }}>
-          <h3 style={{ margin: 0, color: '#388E3C' }}>
+        <div className="stat-card stat-approved">
+          <h3 className="stat-number">
             {leaseRequests.filter(r => r.status === 'Goedgekeurd').length}
           </h3>
-          <p style={{ margin: '5px 0 0 0', color: '#666' }}>Goedgekeurd</p>
+          <p className="stat-label">Goedgekeurd</p>
         </div>
-        <div style={{ background: '#FFEBEE', padding: '15px', borderRadius: '8px', textAlign: 'center' }}>
-          <h3 style={{ margin: 0, color: '#D32F2F' }}>
+        <div className="stat-card stat-rejected">
+          <h3 className="stat-number">
             {leaseRequests.filter(r => r.status === 'Afgewezen').length}
           </h3>
-          <p style={{ margin: '5px 0 0 0', color: '#666' }}>Afgewezen</p>
+          <p className="stat-label">Afgewezen</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '15px', 
-        marginBottom: '20px',
-        flexWrap: 'wrap',
-        alignItems: 'center'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FilterListIcon style={{ color: '#666' }} />
+      <div className="lease-overview-filters">
+        <div className="filter-group">
+          <FilterListIcon className="filter-icon" />
           <select 
             value={filter} 
             onChange={(e) => setFilter(e.target.value)}
-            style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+            className="filter-select"
           >
             <option value="all">Alle Status</option>
             <option value="Nieuw">Nieuw</option>
@@ -171,105 +160,87 @@ export default function LeaseOverview() {
           </select>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <SearchIcon style={{ color: '#666' }} />
+        <div className="filter-group">
+          <SearchIcon className="filter-icon" />
           <input
             type="text"
             placeholder="Zoek op naam, email of voertuig..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ 
-              padding: '8px', 
-              borderRadius: '4px', 
-              border: '1px solid #ddd',
-              minWidth: '250px'
-            }}
+            className="search-input"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div style={{ 
-        background: 'white', 
-        borderRadius: '8px', 
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        overflow: 'hidden'
-      }}>
+      <div className="lease-overview-table-container">
         {loading ? (
           <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
             Laden...
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="lease-overview-table-wrapper">
+            <table className="lease-overview-table">
               <thead>
-                <tr style={{ background: '#f5f5f5' }}>
-                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Naam</th>
-                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Email</th>
-                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Voertuig</th>
-                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Maandbedrag</th>
-                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Status</th>
-                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Datum</th>
-                  <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid #ddd' }}>Acties</th>
+                <tr>
+                  <th>Naam</th>
+                  <th>Email</th>
+                  <th>Voertuig</th>
+                  <th>Maandbedrag</th>
+                  <th>Status</th>
+                  <th>Datum</th>
+                  <th>Acties</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRequests.map((request) => (
-                  <tr key={request.id} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '12px' }}>
+                  <tr key={request.id}>
+                    <td>
                       <div>
-                        <strong>{request.voornaam} {request.achternaam}</strong>
+                        <span className="customer-name">{request.voornaam} {request.achternaam}</span>
                         {request.bedrijfsnaam && (
-                          <div style={{ fontSize: '12px', color: '#666' }}>
+                          <div className="company-name">
                             {request.bedrijfsnaam}
                           </div>
                         )}
                       </div>
                     </td>
-                    <td style={{ padding: '12px' }}>{request.email}</td>
-                    <td style={{ padding: '12px' }}>
+                    <td>{request.email}</td>
+                    <td>
                       <div>
-                        <div>{request.voertuig}</div>
+                        <div className="vehicle-info">{request.voertuig}</div>
                         {getExtraOptions(request).length > 0 && (
-                          <div style={{ fontSize: '12px', color: '#666' }}>
+                          <div className="extra-options">
                             +{getExtraOptions(request).length} opties
                           </div>
                         )}
                       </div>
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td>
                       <div>
-                        <strong>{formatCurrency(request.maandbedrag)}</strong>
+                        <span className="monthly-amount">{formatCurrency(request.maandbedrag)}</span>
                         {request.totaal_opties > 0 && (
-                          <div style={{ fontSize: '12px', color: '#666' }}>
+                          <div className="options-amount">
                             +{formatCurrency(request.totaal_opties)} opties
                           </div>
                         )}
                       </div>
                     </td>
-                    <td style={{ padding: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <td>
+                      <div className="status-cell">
                         {getStatusIcon(request.status)}
-                        <span style={{ color: getStatusColor(request.status) }}>
+                        <span className="status-text" style={{ color: getStatusColor(request.status) }}>
                           {request.status}
                         </span>
                       </div>
                     </td>
-                    <td style={{ padding: '12px' }}>
+                    <td>
                       {formatDate(request.created_at)}
                     </td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <td style={{ textAlign: 'center' }}>
                       <button
                         onClick={() => setSelectedRequest(request)}
-                        style={{
-                          background: '#2196F3',
-                          color: 'white',
-                          border: 'none',
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
+                        className="view-button"
                       >
                         <VisibilityIcon style={{ fontSize: '16px' }} />
                       </button>
@@ -284,45 +255,20 @@ export default function LeaseOverview() {
 
       {/* Detail Modal */}
       {selectedRequest && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '8px',
-            padding: '20px',
-            maxWidth: '600px',
-            maxHeight: '80vh',
-            overflow: 'auto',
-            width: '90%'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ margin: 0 }}>Aanvraag Details</h2>
+        <div className="detail-modal-overlay">
+          <div className="detail-modal">
+            <div className="modal-header">
+              <h2 className="modal-title">Aanvraag Details</h2>
               <button
                 onClick={() => setSelectedRequest(null)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '20px',
-                  cursor: 'pointer',
-                  color: '#666'
-                }}
+                className="close-button"
               >
                 ×
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div>
+            <div className="modal-content-grid">
+              <div className="modal-section">
                 <h3>Persoonlijke Gegevens</h3>
                 <p><strong>Naam:</strong> {selectedRequest.voornaam} {selectedRequest.achternaam}</p>
                 <p><strong>Email:</strong> {selectedRequest.email}</p>
@@ -335,7 +281,7 @@ export default function LeaseOverview() {
                 )}
               </div>
 
-              <div>
+              <div className="modal-section">
                 <h3>Lease Gegevens</h3>
                 <p><strong>Type:</strong> {selectedRequest.lease_type}</p>
                 <p><strong>Voertuig:</strong> {selectedRequest.voertuig}</p>
@@ -347,9 +293,9 @@ export default function LeaseOverview() {
             </div>
 
             {getExtraOptions(selectedRequest).length > 0 && (
-              <div style={{ marginTop: '20px' }}>
+              <div className="extra-options-section">
                 <h3>Extra Opties</h3>
-                <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                <ul className="extra-options-list">
                   {getExtraOptions(selectedRequest).map((option, index) => (
                     <li key={index}>{option}</li>
                   ))}
@@ -358,7 +304,7 @@ export default function LeaseOverview() {
               </div>
             )}
 
-            <div style={{ marginTop: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '4px' }}>
+            <div className="status-summary">
               <p><strong>Status:</strong> {selectedRequest.status}</p>
               <p><strong>Aangemaakt:</strong> {formatDate(selectedRequest.created_at)}</p>
             </div>

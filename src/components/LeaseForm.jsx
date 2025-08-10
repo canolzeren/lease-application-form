@@ -463,30 +463,22 @@ export default function LeaseForm({ onComplete, onShowCalculator, onShowContact 
                     )}
 
                     {/* Berekende velden - neatly organized */}
-                    <div className="calculation-grid" style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: '1fr 1fr', 
-                        gap: '1rem', 
-                        marginTop: '1.5rem',
-                        padding: '1rem',
-                        backgroundColor: 'var(--muted)',
-                        borderRadius: '8px'
-                    }}>
+                    <div className="calculation-grid">
                         <div className="calc-item">
-                            <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>BTW-bedrag</span>
-                            <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>{formatCurrency(calculateBtwBedrag())}</span>
+                            <span>BTW-bedrag</span>
+                            <span>{formatCurrency(calculateBtwBedrag())}</span>
                         </div>
                         <div className="calc-item">
-                            <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Aanschafwaarde Excl. BTW</span>
-                            <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>{formatCurrency(calculateAanschafwaardeExclBtw())}</span>
+                            <span>Aanschafwaarde Excl. BTW</span>
+                            <span>{formatCurrency(calculateAanschafwaardeExclBtw())}</span>
                         </div>
                         <div className="calc-item">
-                            <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Leasebedrag</span>
-                            <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>{formatCurrency(calculateLeasebedrag())}</span>
+                            <span>Leasebedrag</span>
+                            <span>{formatCurrency(calculateLeasebedrag())}</span>
                         </div>
                         <div className="calc-item">
-                            <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Slottermijn ({calculateSlottermijnPercentage()}%)</span>
-                            <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>{formatCurrency(calculateSlottermijnBedrag())}</span>
+                            <span>Slottermijn ({calculateSlottermijnPercentage()}%)</span>
+                            <span>{formatCurrency(calculateSlottermijnBedrag())}</span>
                         </div>
                     </div>
                 </div>
@@ -511,7 +503,7 @@ export default function LeaseForm({ onComplete, onShowCalculator, onShowContact 
 
                     <div className="input-group">
                         <label>Gewenst krediet</label>
-                        <div className="input-box" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
+                        <div className="input-box input-box-disabled">
                             {formatCurrency(calculateGewenstKrediet())}
                         </div>
                     </div>
@@ -633,4 +625,4 @@ export default function LeaseForm({ onComplete, onShowCalculator, onShowContact 
             </div>
         </div>
     );
-} 
+}
