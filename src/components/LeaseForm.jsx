@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import notificationService from '../lib/notifications';
 
 const AIRTABLE_TOKEN = 'patlA8VoCdqHS9GkQ.63999c29a21d80a36c4617805edcd765fc4d87d1397ea34f0fa03e698f5b98bf';
 const BASE_ID = 'appWGgRPKQ3yvx3zd';
@@ -534,14 +533,6 @@ export default function LeaseForm({ onComplete, onShowCalculator, onShowContact 
                                     checked={formData.looptijd === looptijd}
                                     onChange={() => {
                                         setFormData(prev => ({ ...prev, looptijd: looptijd }));
-                                        
-                                        // Stuur notificatie bij looptijd wijziging
-                                        const newMonthlyAmount = calculateMaandlast(looptijd);
-                                        notificationService.showNotification('⏰ Looptijd gewijzigd', {
-                                            body: `${looptijd} maanden - €${newMonthlyAmount.toLocaleString('nl-NL')}/maand`,
-                                            type: 'new-request',
-                                            tag: 'looptijd-changed'
-                                        });
                                     }}
                                 />
                                 <span className="looptijd-radio-label">
@@ -631,14 +622,6 @@ export default function LeaseForm({ onComplete, onShowCalculator, onShowContact 
                 <button 
                     className="submit-button"
                     onClick={() => {
-                        // Stuur notificatie bij formulier indiening
-                        notificationService.showNotification('📋 Formulier wordt ingediend', {
-                            body: `${leaseType === 'financial' ? 'Financial Lease' : 
-                                   leaseType === 'private' ? 'Private Lease' : 'Operational Lease'} aanvraag wordt verwerkt...`,
-                            type: 'new-request',
-                            tag: 'form-submitting'
-                        });
-                        
                         handleSubmit();
                     }}
                     disabled={selectedVoertuig === null || formData.verkoopprijs <= 0}
