@@ -139,10 +139,6 @@ export default function ExtraOptions({ onBack, onComplete, leaseData }) {
       </div>
 
       <div className="bottom-section">
-        <div className="info-line">
-          <span className="check-icon"></span>
-          Uitslag binnen: <strong>35 minuten</strong>
-        </div>
         <button className="secondary-button" onClick={onBack}>Terug</button>
         <button 
           className="submit-button" 

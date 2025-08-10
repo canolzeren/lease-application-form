@@ -20,7 +20,10 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
-    open: true
+    open: true,
+    hmr: {
+      overlay: false
+    }
   },
   preview: {
     port: 4173,

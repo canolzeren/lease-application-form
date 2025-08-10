@@ -1,0 +1,14 @@
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/superform
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/superform/*
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/crm
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/crm/*
+  Cache-Control: no-cache, no-store, must-revalidate

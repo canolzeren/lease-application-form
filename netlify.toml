@@ -12,3 +12,33 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
+
+[[headers]]
+  # Zorg dat de SPA-shell nooit gecachet wordt
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  # Specifieke route die je gebruikt: forceer no-cache
+  for = "/superform"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  # Indien er subroutes zijn onder /superform
+  for = "/superform/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  # CRM route: forceer no-cache
+  for = "/crm"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  # CRM subroutes
+  for = "/crm/*"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import './App.css';
 import LeaseForm from './components/LeaseForm.jsx';
@@ -7,8 +7,11 @@ import BusinessInfo from './components/BusinessInfo.jsx';
 import PersonalDetailsExtra from './components/PersonalDetailsExtra.jsx';
 import ContactDetails from './components/ContactDetails.jsx';
 import FinancialDetails from './components/FinancialDetails.jsx';
+import ContactForm from './components/ContactForm.jsx';
+import Calculator from './components/Calculator.jsx';
 import { createClient } from '@supabase/supabase-js';
 import { isSupabaseAvailable } from './lib/supabase';
+import notificationService from './lib/notifications';
 
 // Supabase client for CRM data
 const supabase = createClient(
@@ -20,48 +23,46 @@ function Navigation() {
   const location = useLocation();
   
   return (
-    <div style={{
-      background: '#f8f9fa',
+    <div className="nav-container" style={{
+      background: 'var(--secondary)',
       padding: '10px 20px',
-      borderBottom: '1px solid #dee2e6',
+      borderBottom: '1px solid var(--border)',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <h3 style={{ margin: 0, color: '#d846b4' }}>Lease Management</h3>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <Link
-            to="/superform"
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '4px',
-              background: location.pathname === '/superform' ? '#d846b4' : '#e9ecef',
-              color: location.pathname === '/superform' ? 'white' : '#495057',
-              cursor: 'pointer',
-              fontWeight: location.pathname === '/superform' ? 'bold' : 'normal',
-              textDecoration: 'none'
-            }}
-          >
-            SuperForm
-          </Link>
-          <Link
-            to="/crm"
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '4px',
-              background: location.pathname === '/crm' ? '#d846b4' : '#e9ecef',
-              color: location.pathname === '/crm' ? 'white' : '#495057',
-              cursor: 'pointer',
-              fontWeight: location.pathname === '/crm' ? 'bold' : 'normal',
-              textDecoration: 'none'
-            }}
-          >
-            CRM
-          </Link>
-        </div>
+      <h3 className="nav-title" style={{ margin: 0, color: 'var(--foreground)' }}>Lease Management</h3>
+      <div className="nav-links" style={{ display: 'flex', gap: '10px' }}>
+        <Link
+          to="/superform"
+          style={{
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '4px',
+            background: location.pathname === '/superform' ? 'var(--primary)' : 'var(--secondary)',
+            color: location.pathname === '/superform' ? 'var(--primary-foreground)' : 'var(--foreground)',
+            cursor: 'pointer',
+            fontWeight: location.pathname === '/superform' ? 'bold' : 'normal',
+            textDecoration: 'none'
+          }}
+        >
+          SuperForm
+        </Link>
+        <Link
+          to="/crm"
+          style={{
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '4px',
+            background: location.pathname === '/crm' ? 'var(--primary)' : 'var(--secondary)',
+            color: location.pathname === '/crm' ? 'var(--primary-foreground)' : 'var(--foreground)',
+            cursor: 'pointer',
+            fontWeight: location.pathname === '/crm' ? 'bold' : 'normal',
+            textDecoration: 'none'
+          }}
+        >
+          CRM
+        </Link>
       </div>
     </div>
   );
@@ -71,9 +72,10 @@ function SuperForm() {
   const [currentStep, setCurrentStep] = React.useState(0);
   const [leaseData, setLeaseData] = React.useState(null);
   const [submittedData, setSubmittedData] = React.useState(null);
+  const [showContactForm, setShowContactForm] = React.useState(false);
+  const [showCalculator, setShowCalculator] = React.useState(false);
 
-  // Simpele voortgangsweergave: alleen stapnummers (geen labels)
-  const totalSteps = leaseData?.leaseType === 'private' ? 4 : 3;
+  // Simpele voortgangsweergave verwijderd
 
   const handleLeaseComplete = (data) => {
     setLeaseData(data);
@@ -228,34 +230,19 @@ function SuperForm() {
 
   return (
     <div className="app">
-      <div className="header" style={{ padding: '1rem', textAlign: 'center' }}>
+      <div className="header" style={{ padding: '1rem', textAlign: 'center', position: 'relative' }}>
         <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Lease Aanvraagformulier</h1>
         <p style={{ fontSize: '0.9rem', color: '#6c757d' }}>Kies uw lease type en vul het formulier in (v2)</p>
       </div>
 
-      {currentStep < 4 && (
-        <div className="progress-container">
-          <div className="progress-bar">
-            {Array.from({ length: totalSteps }).map((_, index) => (
-              <div key={index} className={`progress-step ${index <= currentStep ? 'completed' : ''}`}>
-                <div className="progress-icon">
-                  {index < currentStep ? (
-                    <div style={{ color: '#4CAF50', fontSize: '20px' }}>✓</div>
-                  ) : index === currentStep ? (
-                    <div className="current-step-indicator">{index + 1}</div>
-                  ) : (
-                    <div className="progress-step-number">{index + 1}</div>
-                  )}
-                </div>
-                {/* Labels verwijderd voor eenvoudige voortgang */}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      
 
       {currentStep === 0 && (
-        <LeaseForm onComplete={handleLeaseComplete} />
+        <LeaseForm 
+          onComplete={handleLeaseComplete} 
+          onShowCalculator={() => setShowCalculator(true)}
+          onShowContact={() => setShowContactForm(true)}
+        />
       )}
 
 
@@ -311,17 +298,11 @@ function SuperForm() {
       )}
 
       {currentStep === 2 && leaseData?.leaseType !== 'private' && (
-        <div>
-          <div className="step-header">
-            <h2>Persoonlijke Gegevens</h2>
-            <p>Vul uw gegevens in om de aanvraag af te ronden</p>
-          </div>
-          <BusinessInfo 
-            onComplete={handleFormComplete} 
-            onBack={handleBack}
-            leaseData={leaseData}
-          />
-        </div>
+        <BusinessInfo 
+          onComplete={handleFormComplete} 
+          onBack={handleBack}
+          leaseData={leaseData}
+        />
       )}
 
       {currentStep === (leaseData?.leaseType === 'private' ? 4 : 3) && (
@@ -395,21 +376,225 @@ function SuperForm() {
           </div>
         </div>
       )}
+
+      {/* Contact Form Modal */}
+      {showContactForm && (
+        <ContactForm onClose={() => setShowContactForm(false)} />
+      )}
+
+      {/* Calculator Modal */}
+      {showCalculator && (
+        <Calculator onClose={() => setShowCalculator(false)} />
+      )}
     </div>
   );
 }
 
 function CRM() {
   const [requests, setRequests] = React.useState([]);
+  const [filteredRequests, setFilteredRequests] = React.useState([]);
+  const [searchTerm, setSearchTerm] = React.useState('');
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [testing, setTesting] = React.useState(false);
   const [selectedRequest, setSelectedRequest] = React.useState(null);
   const [showDetails, setShowDetails] = React.useState(false);
+  const [editingField, setEditingField] = React.useState(null);
+  const [editValue, setEditValue] = React.useState('');
+  const [notificationsEnabled, setNotificationsEnabled] = React.useState(false);
+
+  // Ref om te voorkomen dat subscription meerdere keren wordt aangeroepen
+  const subscriptionRef = React.useRef(null);
 
   React.useEffect(() => {
     fetchRequests();
+    
+    // Alleen subscription opzetten als er nog geen bestaat
+    if (!subscriptionRef.current) {
+      subscriptionRef.current = setupRealtimeSubscription();
+    }
+    
+    initializeNotifications();
+    setupCrossTabNotifications();
+    
+    return () => {
+      // Cleanup subscription on unmount
+      if (subscriptionRef.current) {
+        console.log('🧹 Cleaning up subscription on unmount...');
+        supabase.removeAllChannels();
+        subscriptionRef.current = null;
+      }
+    };
   }, []);
+
+  // Setup cross-tab communication for notifications
+  const setupCrossTabNotifications = () => {
+    console.log('🔗 Setting up cross-tab notification listening...');
+    
+    const handleStorageChange = (event) => {
+      console.log('🔍 Storage change detected:', event.key, event.newValue);
+      
+      if (event.key === 'newLeaseNotification' && event.newValue) {
+        try {
+          const notificationData = JSON.parse(event.newValue);
+          console.log('📨 Received cross-tab notification:', notificationData);
+          
+          if (notificationData.type === 'new_lease_request' && notificationData.data) {
+            console.log('✅ Processing cross-tab notification...');
+            // Handle the new request
+            handleNewLeaseRequest(notificationData.data);
+            
+            // Clear the notification from localStorage
+            localStorage.removeItem('newLeaseNotification');
+            console.log('🧹 Cross-tab notification cleared from localStorage');
+          }
+        } catch (error) {
+          console.error('❌ Error processing cross-tab notification:', error);
+        }
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storageChange', handleStorageChange);
+    };
+  };
+
+  // Filter requests based on search term
+  React.useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredRequests(requests);
+    } else {
+      const filtered = requests.filter(request => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          (request.voornaam?.toLowerCase().includes(searchLower)) ||
+          (request.achternaam?.toLowerCase().includes(searchLower)) ||
+          (request.email?.toLowerCase().includes(searchLower)) ||
+          (request.telefoon?.includes(searchTerm)) ||
+          (request.merk?.toLowerCase().includes(searchLower)) ||
+          (request.model?.toLowerCase().includes(searchLower)) ||
+          (request.voertuig?.toLowerCase().includes(searchLower)) ||
+          (request.lease_type?.toLowerCase().includes(searchLower)) ||
+          (request.status?.toLowerCase().includes(searchLower)) ||
+          (request.id?.toString().includes(searchTerm))
+        );
+      });
+      setFilteredRequests(filtered);
+    }
+  }, [requests, searchTerm]);
+
+  // Initialize notifications
+  const initializeNotifications = async () => {
+    const hasPermission = await notificationService.requestPermission();
+    setNotificationsEnabled(hasPermission);
+    
+    if (hasPermission) {
+      console.log('✅ Push notifications enabled for CRM');
+    } else {
+      console.log('❌ Push notifications disabled or not supported');
+    }
+  };
+
+  // Setup real-time subscription for new lease requests
+  const setupRealtimeSubscription = () => {
+    if (!isSupabaseAvailable()) {
+      console.log('⚠️ Supabase not available - real-time notifications disabled');
+      return;
+    }
+
+    // Cleanup bestaande channels om duplicate subscription errors te voorkomen
+    console.log('🧹 Cleaning up existing channels...');
+    if (subscriptionRef.current) {
+      console.log('🔄 Replacing existing subscription...');
+    }
+    supabase.removeAllChannels();
+
+    console.log('🔌 Setting up real-time subscription for lease_aanvragen...');
+
+    const channel = supabase
+      .channel('lease_requests_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'lease_aanvragen'
+        },
+        (payload) => {
+          console.log('🚨 New lease request detected via real-time:', payload);
+          console.log('📊 Payload details:', {
+            eventType: payload.eventType,
+            new: payload.new,
+            old: payload.old,
+            schema: payload.schema,
+            table: payload.table,
+            commit_timestamp: payload.commit_timestamp
+          });
+          handleNewLeaseRequest(payload.new);
+        }
+      )
+      .subscribe((status, err) => {
+        console.log('📡 Real-time subscription status:', status);
+        if (err) {
+          console.error('❌ Real-time subscription error:', err);
+        }
+        
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ Successfully subscribed to lease_aanvragen changes');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Channel error - retrying in 5 seconds...');
+          // Cleanup en retry
+          supabase.removeAllChannels();
+          subscriptionRef.current = null;
+          setTimeout(() => {
+            console.log('🔄 Retrying subscription...');
+            if (!subscriptionRef.current) {
+              subscriptionRef.current = setupRealtimeSubscription();
+            }
+          }, 5000);
+        }
+      });
+
+    // Update de ref met de nieuwe channel
+    subscriptionRef.current = channel;
+    return channel;
+  };
+
+  // Handle new lease request notification
+  const handleNewLeaseRequest = (newRequest) => {
+    console.log('🔔 Processing new lease request for notifications...');
+    console.log('📋 Request data:', newRequest);
+    console.log('📱 Notifications enabled:', notificationsEnabled);
+    console.log('🔐 Can show notifications:', notificationService.canShowNotifications());
+    
+    // Add to local state immediately
+    setRequests(prev => [newRequest, ...prev]);
+    
+    // Show notification if enabled
+    if (notificationsEnabled && notificationService.canShowNotifications()) {
+      const customerName = `${newRequest.voornaam || ''} ${newRequest.achternaam || ''}`.trim() || 'Nieuwe klant';
+      const leaseType = newRequest.lease_type || 'Lease';
+      const amount = newRequest.maandbedrag;
+      
+      // Determine notification type based on amount
+      if (amount && amount >= 1000) {
+        notificationService.highValueRequest(customerName, amount);
+      } else {
+        notificationService.newLeaseRequest(customerName, leaseType, amount);
+      }
+      
+      // Play notification sound (optional)
+      try {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D0r2AfBTGH0fPTgjMGK37O7+CVPO0NVq3n77BdGAg+ltryxnkpBSl+zPLaizsIGGS57OihUgwUVKrj8bllHgg2jdXzzn0vBSF1xe/dkTwIHVu16OWiUQwORJzd8bJjHAU2jdXzzn0vBSN2xe/dkTsKGGS76OWnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGO76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkTsJGGS76OWnUgwTPJzd8rJjHAU2jdXzzn0vBSJ2xe/dkjsJGGO76OSnUgwURJzd8bJjHAU2jdXzzn0vBSN2xe/dkTsJGGS76OWnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJGGS76OSnUgwURJzd8bJjHAU2jdXzzn0vBSJ2xe/dkjsJ');
+        audio.volume = 0.3;
+        audio.play().catch(() => {}); // Ignore errors
+      } catch (e) {
+        // Ignore audio errors
+      }
+    }
+  };
 
   const fetchRequests = async () => {
     try {
@@ -472,10 +657,194 @@ function CRM() {
     return `€${number.toLocaleString('nl-NL')}`;
   };
 
+  const exportToCSV = () => {
+    if (requests.length === 0) {
+      alert('Geen data om te exporteren');
+      return;
+    }
+
+    // CSV headers
+    const headers = [
+      'ID',
+      'Datum',
+      'Lease Type',
+      'Status',
+      'Voornaam',
+      'Achternaam',
+      'Email',
+      'Telefoon',
+      'Voertuig',
+      'Kenteken',
+      'Maandbedrag',
+      'Looptijd (maanden)',
+      'Verkoopprijs',
+      'Aanbetaling',
+      'Gewenst Krediet',
+      'Geboortedatum',
+      'Burgerlijke Staat',
+      'Straat',
+      'Huisnummer',
+      'Postcode',
+      'Woonplaats',
+      'Dienstverband',
+      'Beroep',
+      'Bruto Inkomen',
+      'Woonsituatie',
+      'Woonlasten'
+    ];
+
+    // Convert data to CSV format
+    const csvData = requests.map(request => [
+      request.id || '',
+      request.created_at ? formatDate(request.created_at) : '',
+      request.lease_type || '',
+      request.status || '',
+      request.voornaam || request.aanhef || '',
+      request.achternaam || '',
+      request.email || '',
+      request.telefoon || '',
+      `${request.voertuig || request.merk || ''}${request.type ? ` ${request.type}` : ''}`,
+      request.kenteken || '',
+      request.maandbedrag || '',
+      request.looptijd || '',
+      request.verkoopprijs || '',
+      request.aanbetaling || '',
+      request.gewenst_krediet || '',
+      request.geboortedatum || '',
+      request.burgerlijke_staat || '',
+      request.straat || '',
+      request.huisnummer || '',
+      request.postcode || '',
+      request.woonplaats || '',
+      request.dienstverband || '',
+      request.beroep || '',
+      request.bruto_inkomen || '',
+      request.woonsituatie || '',
+      request.maandelijkse_woonlasten || ''
+    ]);
+
+    // Combine headers and data
+    const csvContent = [headers, ...csvData]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `lease-aanvragen-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const updateField = async (fieldName, newValue) => {
+    if (!selectedRequest?.id || !isSupabaseAvailable()) {
+      alert('Kan gegevens niet opslaan - database niet beschikbaar');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('lease_aanvragen')
+        .update({ [fieldName]: newValue })
+        .eq('id', selectedRequest.id)
+        .select();
+
+      if (error) {
+        console.error('❌ Update failed:', error);
+        alert(`❌ Fout bij opslaan: ${error.message}`);
+      } else {
+        console.log('✅ Field updated:', fieldName, newValue);
+        // Update local state
+        setSelectedRequest(prev => ({ ...prev, [fieldName]: newValue }));
+        setRequests(prev => prev.map(req => 
+          req.id === selectedRequest.id ? { ...req, [fieldName]: newValue } : req
+        ));
+        setEditingField(null);
+      }
+    } catch (err) {
+      console.error('❌ Update error:', err);
+      alert(`❌ Opslaan mislukt: ${err.message}`);
+    }
+  };
+
+  const startEdit = (fieldName, currentValue) => {
+    setEditingField(fieldName);
+    setEditValue(currentValue || '');
+  };
+
+  const cancelEdit = () => {
+    setEditingField(null);
+    setEditValue('');
+  };
+
+  const saveEdit = () => {
+    if (editingField && editValue !== selectedRequest[editingField]) {
+      updateField(editingField, editValue);
+    } else {
+      setEditingField(null);
+    }
+  };
+
+  const renderEditableField = (label, fieldName, value) => {
+    const isEditing = editingField === fieldName;
+    const displayValue = value ?? 'N/B';
+    
+    return (
+      <div className="crm-detail-row">
+        <div className="crm-detail-label">{label}</div>
+        <div className="crm-detail-value">
+          {isEditing ? (
+            <div className="crm-edit-container">
+              <input
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') saveEdit();
+                  if (e.key === 'Escape') cancelEdit();
+                }}
+                className="crm-edit-input"
+                autoFocus
+              />
+              <div className="crm-edit-buttons">
+                <button
+                  onClick={saveEdit}
+                  className="crm-edit-save"
+                >
+                  ✓
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  className="crm-edit-cancel"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          ) : (
+                      <div
+            onClick={() => startEdit(fieldName, value)}
+            className="crm-edit-trigger"
+            title="Tik om te bewerken"
+          >
+            <span className="crm-field-value">{displayValue}</span>
+          </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderDetailRow = (label, value) => (
-    <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '12px' }}>
-      <div style={{ color: '#6c757d' }}>{label}</div>
-      <div style={{ fontWeight: 600 }}>{value ?? 'N/B'}</div>
+    <div className="crm-detail-row">
+      <div className="crm-detail-label">{label}</div>
+      <div className="crm-detail-value">
+        <span className="crm-field-value">{value ?? 'N/B'}</span>
+      </div>
     </div>
   );
 
@@ -523,97 +892,133 @@ function CRM() {
   }
 
   return (
-    <div className="app">
-      <div className="header">
-        <h1>CRM Dashboard</h1>
-        <p>Beheer alle lease aanvragen</p>
-      </div>
-      <div className="crm-content container">
-        <div className="crm-card crm-debug">
-          <strong>🔧 Debug Info:</strong><br/>
-          Supabase configured: {isSupabaseAvailable() ? '✅ Ja' : '❌ Nee'}<br/>
-          Supabase client: {supabase ? '✅ Created' : '❌ Not created'}<br/>
-          Total requests: {requests.length}<br/>
-          Last fetch: {new Date().toLocaleTimeString()}<br/>
-          Testing status: {testing ? '⏳ Testing...' : '✅ Ready'}<br/>
-          <button 
-            onClick={async () => {
-              console.log('🔄 Manual database test...');
-              setTesting(true);
-              try {
-                await fetchRequests();
-                console.log('✅ Database test completed');
-              } catch (err) {
-                console.error('❌ Database test failed:', err);
-              } finally {
-                setTesting(false);
-              }
-            }}
-            disabled={testing}
-            className={`btn ${testing ? 'btn-muted' : 'btn-primary'}`}
-          >
-            {testing ? '⏳ Testing...' : '🔄 Test Database'}
-          </button>
-          <button 
-            onClick={async () => {
-              console.log('🧪 Adding test Private Lease record...');
-              setTesting(true);
-              try {
-                const testData = {
-                  lease_type: 'Private Lease',
-                  status: 'Nieuw',
-                  voornaam: 'Test',
-                  achternaam: 'User',
-                  email: 'test@example.com',
-                  telefoon: '0612345678',
-                  voertuig: 'BMW X3',
-                  maandbedrag: 500,
-                  looptijd: 48,
-                  created_at: new Date().toISOString()
-                };
-                
-                const { data, error } = await supabase
-                  .from('lease_aanvragen')
-                  .insert([testData])
-                  .select();
-                
-                if (error) {
-                  console.error('❌ Test insert failed:', error);
-                  alert(`❌ Test insert failed: ${error.message}`);
-                } else {
-                  console.log('✅ Test record inserted:', data);
-                  alert('✅ Test record successfully inserted!');
-                  await fetchRequests(); // Refresh the list
+    <div className="crm-dashboard">
+      {/* Minimalist Header */}
+      <div className="crm-header">
+        <div className="crm-title-section">
+          <h1 className="crm-title">Lease aanvragen</h1>
+          <span className="crm-count">{filteredRequests.length} {searchTerm ? `van ${requests.length} ` : ''}aanvragen</span>
+        </div>
+        
+        <div className="crm-controls">
+          <div className="crm-search">
+            <span className="material-icons search-icon">search</span>
+            <input
+              type="text"
+              placeholder="Zoek aanvragen..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            {searchTerm && (
+              <button onClick={() => setSearchTerm('')} className="search-clear">
+                <span className="material-icons">close</span>
+              </button>
+            )}
+          </div>
+          
+          <div className="crm-actions">
+            {/* Notification Toggle */}
+            <button 
+              onClick={async () => {
+                try {
+                  await notificationService.testNotification();
+                } catch (error) {
+                  console.error('Test notification error:', error);
+                  alert('❌ Notification test mislukt: ' + error.message);
                 }
-              } catch (err) {
-                console.error('❌ Test insert error:', err);
-                alert(`❌ Test insert error: ${err.message}`);
-              } finally {
-                setTesting(false);
-              }
-            }}
-            disabled={testing}
-            className={`btn ${testing ? 'btn-muted' : 'btn-success'}`}
-          >
-            {testing ? '⏳ Testing...' : '🧪 Add Test Record'}
-          </button>
+              }} 
+              className="action-btn secondary"
+              title="Test notificatie - Check of push notifications werken"
+            >
+              <span className="material-icons">notifications</span>
+              Test
+            </button>
+            
+            {/* Debug Button */}
+            <button 
+              onClick={async () => {
+                console.log('🔍 DEBUG INFO:');
+                console.log('📡 Supabase available:', isSupabaseAvailable());
+                console.log('📱 Notifications enabled:', notificationsEnabled);
+                console.log('🔔 Can show notifications:', notificationService.canShowNotifications());
+                console.log('🌐 Browser permission:', Notification?.permission);
+                console.log('📊 Current requests count:', requests.length);
+                
+                // Check recent submissions
+                if (isSupabaseAvailable()) {
+                  try {
+                    const { data, error } = await supabase
+                      .from('lease_aanvragen')
+                      .select('*')
+                      .order('created_at', { ascending: false })
+                      .limit(5);
+                    
+                    if (error) {
+                      console.error('❌ Debug fetch error:', error);
+                    } else {
+                      console.log('📋 Last 5 submissions:', data);
+                    }
+                  } catch (err) {
+                    console.error('❌ Debug error:', err);
+                  }
+                }
+                
+                alert('Debug info logged to console. Open Developer Tools → Console.');
+              }} 
+              className="action-btn secondary"
+              title="Debug notification system"
+            >
+              <span className="material-icons">bug_report</span>
+              Debug
+            </button>
+            
+            <div className="notification-status">
+              <span className={`notification-indicator ${notificationsEnabled ? 'enabled' : 'disabled'}`}>
+                <span className="material-icons">
+                  {notificationsEnabled ? 'notifications_active' : 'notifications_off'}
+                </span>
+              </span>
+              <span className="status-text">
+                {notificationsEnabled ? 'Meldingen aan' : 'Klik Test voor setup'}
+              </span>
+            </div>
+            
+            <button onClick={exportToCSV} className="action-btn secondary" disabled={filteredRequests.length === 0}>
+              <span className="material-icons">download</span>
+              Export
+            </button>
+            <button onClick={fetchRequests} className="action-btn primary">
+              <span className="material-icons">refresh</span>
+            </button>
+          </div>
         </div>
-        <div className="crm-toolbar">
-          <h2>Aanvragen Overzicht ({requests.length} aanvragen)</h2>
-          <button 
-            onClick={fetchRequests}
-            className="btn btn-primary"
-          >
-            🔄 Vernieuwen
-          </button>
-        </div>
-        {requests.length === 0 ? (
+      </div>
+      
+      <div className="crm-content">
+        {loading ? (
           <div className="crm-card" style={{ textAlign: 'center', padding: '40px' }}>
-            <h3>Geen aanvragen gevonden</h3>
-            <p>Er zijn nog geen lease aanvragen ingediend.</p>
+            <h3>Laden...</h3>
+            <p>Aanvragen worden opgehaald...</p>
+          </div>
+        ) : filteredRequests.length === 0 ? (
+          <div className="crm-card" style={{ textAlign: 'center', padding: '40px' }}>
+            <h3>{searchTerm ? 'Geen resultaten gevonden' : 'Geen aanvragen gevonden'}</h3>
+            <p>{searchTerm ? `Geen aanvragen gevonden voor "${searchTerm}"` : 'Er zijn nog geen lease aanvragen ingediend.'}</p>
+            {searchTerm && (
+              <button 
+                onClick={() => setSearchTerm('')}
+                className="btn btn-secondary"
+                style={{ marginTop: '10px' }}
+              >
+                Wis zoekopdracht
+              </button>
+            )}
           </div>
         ) : (
-          <div className="crm-card">
+          <>
+          {/* Desktop Table */}
+          <div className="crm-card crm-desktop-table">
             <table className="crm-table">
               <thead>
                 <tr>
@@ -628,7 +1033,7 @@ function CRM() {
                 </tr>
               </thead>
               <tbody>
-                {requests.map((request, index) => (
+                {filteredRequests.map((request, index) => (
                   <tr 
                     key={request.id || index} 
                     className="crm-row"
@@ -639,8 +1044,11 @@ function CRM() {
                     </td>
                     <td>{request.email || 'N/A'}</td>
                     <td>
-                      <span className={`badge badge-type ${request.lease_type?.replace(/\s/g, '\\ ') || ''}`}>
-                        {request.lease_type || 'Onbekend'}
+                      <span className={`lease-badge lease-${(request.lease_type || '').toLowerCase().replace(/\s/g, '-')}`}>
+                        {request.lease_type === 'financial' ? 'Financiële Lease' : 
+                         request.lease_type === 'private' ? 'Particuliere Lease' :
+                         request.lease_type === 'operational' ? 'Operationele Lease' : 
+                         request.lease_type || 'Onbekend'}
                       </span>
                     </td>
                     <td>
@@ -670,6 +1078,55 @@ function CRM() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Cards */}
+          <div className="crm-mobile-cards">
+            {filteredRequests.map((request, index) => (
+              <div 
+                key={request.id || index} 
+                className="crm-mobile-card"
+                onClick={() => { setSelectedRequest(request); setShowDetails(true); }}
+              >
+                <div className="card-header">
+                  <div className="card-name">{request.voornaam || request.aanhef || 'N/A'} {request.achternaam || ''}</div>
+                  <div className="card-id">#{request.id || index + 1}</div>
+                </div>
+                
+                <div className="card-content">
+                  <div className="card-row">
+                    <span className="card-label">📧</span>
+                    <span className="card-value">{request.email?.substring(0, 20) + (request.email?.length > 20 ? '...' : '') || 'N/A'}</span>
+                  </div>
+                  <div className="card-row">
+                    <span className="card-label">📱</span>
+                    <span className="card-value">{request.telefoon || 'N/A'}</span>
+                  </div>
+                  <div className="card-row">
+                    <span className="card-label">🚗</span>
+                    <span className="card-value">{request.voertuig || request.merk || 'N/A'}</span>
+                  </div>
+                  <div className="card-row">
+                    <span className="card-label">💰</span>
+                    <span className="card-value">{request.maandbedrag ? `€${request.maandbedrag.toLocaleString()}` : 'N/A'}</span>
+                  </div>
+                </div>
+                
+                <div className="card-footer">
+                  <span className={`lease-badge lease-${(request.lease_type || '').toLowerCase().replace(/\s/g, '-')}`}>
+                    {request.lease_type === 'financial' ? 'Financiële' : 
+                     request.lease_type === 'private' ? 'Particuliere' :
+                     request.lease_type === 'operational' ? 'Operationele' : 
+                     request.lease_type || 'Onbekend'}
+                  </span>
+                  <div className="card-footer-right">
+                    <span className={`badge badge-status ${request.status || ''}`}>{request.status || 'Nieuw'}</span>
+                    <span className="card-date">{request.created_at ? formatDate(request.created_at) : 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          </>
         )}
         
         {showDetails && selectedRequest && (
@@ -720,11 +1177,12 @@ function CRM() {
               <div className="crm-section">
                 <h3>Persoonlijke gegevens</h3>
                 <div className="crm-detail-grid">
-                  {renderDetailRow('Naam', `${selectedRequest.voornaam || selectedRequest.aanhef || 'N/B'} ${selectedRequest.achternaam || ''}`)}
-                  {renderDetailRow('E-mail', selectedRequest.email || 'N/B')}
-                  {renderDetailRow('Telefoon', selectedRequest.telefoon || 'N/B')}
-                  {renderDetailRow('Geboortedatum', selectedRequest.geboortedatum || 'N/B')}
-                  {renderDetailRow('Burgerlijke staat', selectedRequest.burgerlijke_staat || 'N/B')}
+                  {renderEditableField('Voornaam', 'voornaam', selectedRequest.voornaam || selectedRequest.aanhef)}
+                  {renderEditableField('Achternaam', 'achternaam', selectedRequest.achternaam)}
+                  {renderEditableField('E-mail', 'email', selectedRequest.email)}
+                  {renderEditableField('Telefoon', 'telefoon', selectedRequest.telefoon)}
+                  {renderEditableField('Geboortedatum', 'geboortedatum', selectedRequest.geboortedatum)}
+                  {renderEditableField('Burgerlijke staat', 'burgerlijke_staat', selectedRequest.burgerlijke_staat)}
                 </div>
               </div>
 
@@ -732,10 +1190,10 @@ function CRM() {
               <div className="crm-section">
                 <h3>Adres</h3>
                 <div className="crm-detail-grid">
-                  {renderDetailRow('Straat', selectedRequest.straat || 'N/B')}
-                  {renderDetailRow('Huisnummer', selectedRequest.huisnummer || 'N/B')}
-                  {renderDetailRow('Postcode', selectedRequest.postcode || 'N/B')}
-                  {renderDetailRow('Woonplaats', selectedRequest.woonplaats || 'N/B')}
+                  {renderEditableField('Straat', 'straat', selectedRequest.straat)}
+                  {renderEditableField('Huisnummer', 'huisnummer', selectedRequest.huisnummer)}
+                  {renderEditableField('Postcode', 'postcode', selectedRequest.postcode)}
+                  {renderEditableField('Woonplaats', 'woonplaats', selectedRequest.woonplaats)}
                 </div>
               </div>
 
@@ -787,23 +1245,6 @@ function CRM() {
             </div>
           </div>
         )}
-
-        {/* Debug sectie voor ontwikkelaars */}
-        <details style={{ marginTop: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px' }}>
-          <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>🔧 Debug: Ruwe Data (Klik om te tonen)</summary>
-          <div style={{ marginTop: '10px', fontSize: '12px' }}>
-            <strong>Eerste 3 records:</strong>
-            <pre style={{ 
-              background: 'white', 
-              padding: '10px', 
-              borderRadius: '4px', 
-              overflow: 'auto',
-              maxHeight: '200px'
-            }}>
-              {JSON.stringify(requests.slice(0, 3), null, 2)}
-            </pre>
-          </div>
-        </details>
       </div>
     </div>
   );
@@ -815,9 +1256,9 @@ function App() {
       <div>
         <Navigation />
         <Routes>
-                  <Route path="/superform" element={<SuperForm />} />
-        <Route path="/crm" element={<CRM />} />
-        <Route path="/" element={<Navigate to="/superform" replace />} />
+          <Route path="/superform" element={<SuperForm />} />
+          <Route path="/crm" element={<CRM />} />
+          <Route path="/" element={<Navigate to="/superform" replace />} />
           <Route path="*" element={<Navigate to="/superform" replace />} />
         </Routes>
       </div>

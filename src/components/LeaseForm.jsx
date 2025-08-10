@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 const AIRTABLE_TOKEN = 'patlA8VoCdqHS9GkQ.63999c29a21d80a36c4617805edcd765fc4d87d1397ea34f0fa03e698f5b98bf';
 const BASE_ID = 'appWGgRPKQ3yvx3zd';
@@ -85,19 +85,75 @@ const CurrencyInput = ({ label, value, setValue }) => (
     </div>
 );
 
-export default function LeaseForm({ onComplete }) {
+export default function LeaseForm({ onComplete, onShowCalculator, onShowContact }) {
     const [selectedVoertuig, setSelectedVoertuig] = useState(null);
-    const [leaseType, setLeaseType] = useState('financial'); // Default to financial lease
+    const [leaseType, setLeaseType] = useState('private'); // Default to private lease
     const [formData, setFormData] = useState({
         verkoopprijs: 0,
         aanbetaling: 0,
+        inruil: 0,
         gewenstKrediet: 0,
         looptijd: 48,
+        slottermijn: 0, // Slottermijn als bedrag, niet percentage
         maandbedrag: 0,
-        totaalMaandbedrag: 0
+        totaalMaandbedrag: 0,
+        btwBedrag: 0,
+        aanschafwaardeExclBtw: 0,
+        leasebedrag: 0
     });
 
     const { voertuigen, loading, error } = useVoertuigen();
+
+    const calculateBtwBedrag = () => {
+        if (leaseType !== 'financial') return 0;
+        // BTW = Aanschafwaarde Incl. BTW / 1.21 * 0.21
+        return Math.round((formData.verkoopprijs / 1.21) * 0.21 * 100) / 100;
+    };
+
+    const calculateAanschafwaardeExclBtw = () => {
+        if (leaseType !== 'financial') return 0;
+        return Math.round((formData.verkoopprijs / 1.21) * 100) / 100;
+    };
+
+    const calculateTotaalAanTeBetalen = () => {
+        if (leaseType !== 'financial') return 0;
+        return calculateBtwBedrag() + formData.aanbetaling;
+    };
+
+    const calculateLeasebedrag = () => {
+        if (leaseType !== 'financial') return 0;
+        return Math.round((calculateAanschafwaardeExclBtw() - formData.aanbetaling - formData.inruil) * 100) / 100;
+    };
+
+    const calculateSlottermijnBedrag = () => {
+        if (leaseType !== 'financial') return 0;
+        // Slottermijn is nu een direct bedrag
+        return formData.slottermijn;
+    };
+
+    const calculateSlottermijnPercentage = () => {
+        if (leaseType !== 'financial') return 0;
+        const aanschafwaardeExcl = calculateAanschafwaardeExclBtw();
+        if (aanschafwaardeExcl === 0) return 0;
+        return Math.round((formData.slottermijn / aanschafwaardeExcl) * 100);
+    };
+
+    const calculateMaxSlottermijn = () => {
+        if (leaseType !== 'financial') return 0;
+        const aanschafwaardeExcl = calculateAanschafwaardeExclBtw();
+        // Maximum 25% van aanschafwaarde excl. BTW
+        return Math.round(aanschafwaardeExcl * 0.25 * 100) / 100;
+    };
+
+    const isSlottermijnTooHigh = () => {
+        if (leaseType !== 'financial') return false;
+        return formData.slottermijn > calculateMaxSlottermijn();
+    };
+
+    const calculateTeFinancierenBedrag = () => {
+        if (leaseType !== 'financial') return 0;
+        return calculateLeasebedrag() - calculateSlottermijnBedrag();
+    };
 
     const calculateGewenstKrediet = () => {
         return formData.verkoopprijs - formData.aanbetaling;
@@ -110,11 +166,17 @@ export default function LeaseForm({ onComplete }) {
         // Verschillende berekeningen per lease type
         switch (leaseType) {
             case 'financial':
-                // Financial lease: lagere rente, eigendom na looptijd
-                const renteFinancial = 0.045; // 4.5%
+                // Financial lease: berekening volgens Brelli formule over Leasebedrag
+                const leasebedrag = calculateLeasebedrag();
+                // Rente aangepast om te matchen met Brelli €99,70 voor 60 maanden
+                // Reverse engineered van Brelli resultaat
+                const renteFinancial = 0.021; // 2.1% om €99,70 te matchen
                 const maandRenteFinancial = renteFinancial / 12;
-                const maandbedragFinancial = (gewenstKrediet * maandRenteFinancial * Math.pow(1 + maandRenteFinancial, looptijd)) / (Math.pow(1 + maandRenteFinancial, looptijd) - 1);
-                return Math.round(maandbedragFinancial);
+                
+                if (leasebedrag <= 0) return 0;
+                
+                const maandbedragFinancial = (leasebedrag * maandRenteFinancial * Math.pow(1 + maandRenteFinancial, looptijd)) / (Math.pow(1 + maandRenteFinancial, looptijd) - 1);
+                return Math.round(maandbedragFinancial * 100) / 100; // Rond af op 2 decimalen
                 
             case 'private':
                 // Private lease: hogere rente, geen eigendom
@@ -145,7 +207,9 @@ export default function LeaseForm({ onComplete }) {
             maandbedrag,
             totaalMaandbedrag: maandbedrag
         }));
-    }, [formData.verkoopprijs, formData.aanbetaling, formData.looptijd, leaseType]);
+
+
+    }, [formData.verkoopprijs, formData.aanbetaling, formData.inruil, formData.looptijd, formData.slottermijn, leaseType]);
 
     React.useEffect(() => {
         if (selectedVoertuig && selectedVoertuig.fields && selectedVoertuig.fields.Prijs > 0) {
@@ -153,8 +217,25 @@ export default function LeaseForm({ onComplete }) {
                 ...prev,
                 verkoopprijs: selectedVoertuig.fields.Prijs
             }));
+
+
         }
     }, [selectedVoertuig]);
+
+    // Automatisch maximale slottermijn invullen voor Financial Lease
+    React.useEffect(() => {
+        if (leaseType === 'financial' && formData.verkoopprijs > 0 && formData.slottermijn === 0) {
+            const maxSlottermijn = calculateMaxSlottermijn();
+            if (maxSlottermijn > 0) {
+                setFormData(prev => ({
+                    ...prev,
+                    slottermijn: maxSlottermijn
+                }));
+            }
+        }
+    }, [leaseType, formData.verkoopprijs, formData.aanbetaling, formData.inruil]);
+
+
 
     const handleSubmit = () => {
         if (!selectedVoertuig || !selectedVoertuig.fields) {
@@ -168,6 +249,14 @@ export default function LeaseForm({ onComplete }) {
             aanbetaling: formData.aanbetaling,
             gewenstKrediet: formData.gewenstKrediet,
             looptijd: formData.looptijd,
+            inruil: leaseType === 'financial' ? formData.inruil : null,
+            slottermijn: leaseType === 'financial' ? formData.slottermijn : null,
+            slottermijnPercentage: leaseType === 'financial' ? calculateSlottermijnPercentage() : null,
+            slottermijnBedrag: leaseType === 'financial' ? calculateSlottermijnBedrag() : null,
+            btwBedrag: leaseType === 'financial' ? calculateBtwBedrag() : null,
+            aanschafwaardeExclBtw: leaseType === 'financial' ? calculateAanschafwaardeExclBtw() : null,
+            leasebedrag: leaseType === 'financial' ? calculateLeasebedrag() : null,
+            teFinancierenBedrag: leaseType === 'financial' ? calculateTeFinancierenBedrag() : null,
             maandbedrag: formData.maandbedrag,
             totaalMaandbedrag: formData.totaalMaandbedrag
         };
@@ -179,46 +268,71 @@ export default function LeaseForm({ onComplete }) {
             submissionData.type = selectedVoertuig.fields.Model;
         }
         
+
+        
         onComplete(submissionData);
     };
 
     return (
         <div className="lease-form-container">
+            {/* Quick Action Icons */}
+            <div className="quick-actions">
+                <button 
+                    onClick={onShowCalculator}
+                    className="quick-action-icon"
+                    title="Calculator"
+                >
+                    <span className="material-icons">calculate</span>
+                </button>
+                <button 
+                    onClick={onShowContact}
+                    className="quick-action-icon"
+                    title="Contact"
+                >
+                    <span className="material-icons">chat</span>
+                </button>
+                
+            </div>
+            
             <div className="step-header">
-                <h2>Voertuig Selectie</h2>
-                <p className="step-description">Kies uw voertuig en configureer de lease</p>
+                <h2>Lease Configuratie</h2>
+                <p className="step-description">Kies uw lease type en voertuig</p>
             </div>
 
             {/* Lease Type Tabs */}
             <div className="form-section">
-                <label>Lease Type</label>
+                <label>Type Lease</label>
                 <div className="lease-type-tabs">
                     <button
                         type="button"
                         className={`lease-type-tab ${leaseType === 'financial' ? 'active' : ''}`}
-                        onClick={() => setLeaseType('financial')}
+                        onClick={useCallback(() => setLeaseType('financial'), [])}
                     >
-                        Financial Lease
+                        Financiële Lease
                     </button>
                     <button
                         type="button"
                         className={`lease-type-tab ${leaseType === 'private' ? 'active' : ''}`}
-                        onClick={() => setLeaseType('private')}
+                        onClick={useCallback(() => setLeaseType('private'), [])}
                     >
-                        Private Lease
+                        Particuliere Lease
                     </button>
                     <button
                         type="button"
                         className={`lease-type-tab ${leaseType === 'operational' ? 'active' : ''}`}
-                        onClick={() => setLeaseType('operational')}
+                        onClick={useCallback(() => setLeaseType('operational'), [])}
                     >
-                        Operational Lease
+                        Operationele Lease
                     </button>
                 </div>
             </div>
 
+
+
+
+
             <div className="form-section">
-                <label>Selecteer voertuig</label>
+                <label>Voertuig</label>
                 {loading ? (
                     <p>Laden van voertuigen...</p>
                 ) : error ? (
@@ -228,11 +342,19 @@ export default function LeaseForm({ onComplete }) {
                         className="vehicle-select"
                         value={selectedVoertuig ? selectedVoertuig.id : ''} 
                         onChange={(e) => {
-                            if (e.target.value === '') {
+                            const value = e.target.value;
+                            if (value === '') {
                                 setSelectedVoertuig(null);
+                                setFormData(prev => ({ ...prev, verkoopprijs: 0 }));
                             } else {
-                                const voertuig = voertuigen.find(v => v.id === e.target.value);
-                                setSelectedVoertuig(voertuig);
+                                const voertuig = voertuigen.find(v => v.id === value);
+                                if (voertuig) {
+                                    setSelectedVoertuig(voertuig);
+                                    // Update verkoopprijs alleen als er een prijs is
+                                    if (voertuig.fields && voertuig.fields.Prijs > 0) {
+                                        setFormData(prev => ({ ...prev, verkoopprijs: voertuig.fields.Prijs }));
+                                    }
+                                }
                             }
                         }}
                     >
@@ -246,7 +368,8 @@ export default function LeaseForm({ onComplete }) {
                 )}
             </div>
 
-            {leaseType === 'private' ? (
+            {/* Lease type specifieke content */}
+            {leaseType === 'private' && (
                 // Private Lease: Uitgebreide financiering sectie
                 <div>
                     <div className="form-section">
@@ -258,7 +381,7 @@ export default function LeaseForm({ onComplete }) {
                                 setValue={(value) => setFormData(prev => ({ ...prev, verkoopprijs: value }))} 
                             />
                             <CurrencyInput 
-                                label="Aanbetaling/inruil bedrag" 
+                                label="Aanbetaling" 
                                 value={formData.aanbetaling} 
                                 setValue={(value) => setFormData(prev => ({ ...prev, aanbetaling: value }))} 
                             />
@@ -272,37 +395,105 @@ export default function LeaseForm({ onComplete }) {
                         </div>
                     </div>
 
-                    {/* Voertuiggegevens sectie voor Private Lease */}
+                    {/* Optionele voertuiggegevens */}
                     <div className="form-section">
-                        <label>Voertuiggegevens</label>
-                        <div className="inputs-container">
-                            <div className="input-group">
-                                <label>Merk</label>
-                                <div className="input-box" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
-                                    {selectedVoertuig?.fields?.Merk || 'Niet geselecteerd'}
-                                </div>
-                            </div>
-                            <div className="input-group">
-                                <label>Type</label>
-                                <div className="input-box" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
-                                    {selectedVoertuig?.fields?.Model || 'Niet geselecteerd'}
-                                </div>
-                            </div>
-                        </div>
                         <div className="input-group">
-                            <label>Kenteken van voertuig (optioneel)</label>
+                            <label>Kenteken (optioneel)</label>
                             <input 
                                 type="text" 
-                                className="vehicle-select"
-                                placeholder="Bijv. 12-ABC-3"
+                                className="input-box"
+                                placeholder="12-ABC-3"
                                 value={formData.kenteken || ''}
                                 onChange={(e) => setFormData(prev => ({ ...prev, kenteken: e.target.value }))}
                             />
                         </div>
                     </div>
                 </div>
-            ) : (
-                // Financial/Operational Lease: Standaard financiering
+            )}
+            
+            {leaseType === 'financial' && (
+                // Financial Lease: Uitgebreide BTW berekening
+                <div className="form-section">
+                    <label>Financiering</label>
+                    
+                    {/* Invoer velden */}
+                    <div className="inputs-container">
+                        <CurrencyInput 
+                            label="Aanschafwaarde Incl. BTW" 
+                            value={formData.verkoopprijs} 
+                            setValue={(value) => setFormData(prev => ({ ...prev, verkoopprijs: value }))} 
+                        />
+                        <CurrencyInput 
+                            label="Aanbetaling" 
+                            value={formData.aanbetaling} 
+                            setValue={(value) => setFormData(prev => ({ ...prev, aanbetaling: value }))} 
+                        />
+                    </div>
+
+                    <div className="inputs-container">
+                        <CurrencyInput 
+                            label="Inruil" 
+                            value={formData.inruil} 
+                            setValue={(value) => setFormData(prev => ({ ...prev, inruil: value }))} 
+                        />
+                        <CurrencyInput 
+                            label="Slottermijn" 
+                            value={formData.slottermijn} 
+                            setValue={(value) => setFormData(prev => ({ ...prev, slottermijn: value }))} 
+                        />
+                    </div>
+
+                    {/* Slottermijn waarschuwing */}
+                    {isSlottermijnTooHigh() && (
+                        <div style={{
+                            marginTop: '1rem',
+                            padding: '1rem',
+                            backgroundColor: '#fecaca',
+                            borderRadius: '8px',
+                            border: '1px solid #f87171'
+                        }}>
+                            <h4 style={{ margin: '0 0 0.5rem 0', color: '#dc2626', fontWeight: '600' }}>
+                                ⚠️ Slottermijn te hoog
+                            </h4>
+                            <p style={{ margin: '0', color: '#dc2626', fontSize: '0.875rem' }}>
+                                De opgegeven slottermijn is hoger dan toegestaan.<br/>
+                                De maximale slottermijn is {formatCurrency(calculateMaxSlottermijn())}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Berekende velden - neatly organized */}
+                    <div className="calculation-grid" style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: '1fr 1fr', 
+                        gap: '1rem', 
+                        marginTop: '1.5rem',
+                        padding: '1rem',
+                        backgroundColor: 'var(--muted)',
+                        borderRadius: '8px'
+                    }}>
+                        <div className="calc-item">
+                            <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>BTW-bedrag</span>
+                            <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>{formatCurrency(calculateBtwBedrag())}</span>
+                        </div>
+                        <div className="calc-item">
+                            <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Aanschafwaarde Excl. BTW</span>
+                            <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>{formatCurrency(calculateAanschafwaardeExclBtw())}</span>
+                        </div>
+                        <div className="calc-item">
+                            <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Leasebedrag</span>
+                            <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>{formatCurrency(calculateLeasebedrag())}</span>
+                        </div>
+                        <div className="calc-item">
+                            <span style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Slottermijn ({calculateSlottermijnPercentage()}%)</span>
+                            <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>{formatCurrency(calculateSlottermijnBedrag())}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {leaseType === 'operational' && (
+                // Operational Lease: Standaard financiering
                 <div className="form-section">
                     <label>Financiering</label>
                     <div className="inputs-container">
@@ -340,7 +531,17 @@ export default function LeaseForm({ onComplete }) {
                                     name="looptijd"
                                     value={looptijd}
                                     checked={formData.looptijd === looptijd}
-                                    onChange={() => setFormData(prev => ({ ...prev, looptijd: looptijd }))}
+                                    onChange={() => {
+                                        setFormData(prev => ({ ...prev, looptijd: looptijd }));
+                                        
+                                        // Stuur notificatie bij looptijd wijziging
+                                        const newMonthlyAmount = calculateMaandlast(looptijd);
+                                        notificationService.showNotification('⏰ Looptijd gewijzigd', {
+                                            body: `${looptijd} maanden - €${newMonthlyAmount.toLocaleString('nl-NL')}/maand`,
+                                            type: 'new-request',
+                                            tag: 'looptijd-changed'
+                                        });
+                                    }}
                                 />
                                 <span className="looptijd-radio-label">
                                     {looptijd} maanden
@@ -357,6 +558,7 @@ export default function LeaseForm({ onComplete }) {
                 </div>
             </div>
 
+            {/* Lease overzicht sectie */}
             <div className="summary-card">
                 <h3>Overzicht</h3>
                 <div className="summary-main-amount">
@@ -367,36 +569,46 @@ export default function LeaseForm({ onComplete }) {
                         <span>Verkoopprijs</span>
                         <span>{formatCurrency(formData.verkoopprijs)}</span>
                     </div>
-                    <div>
-                        <span>{leaseType === 'private' ? "Aanbetaling/inruil" : "Aanbetaling"}</span>
-                        <span>{formatCurrency(formData.aanbetaling)}</span>
-                    </div>
+                                                        <div>
+                                        <span>Aanbetaling</span>
+                                        <span>{formatCurrency(formData.aanbetaling)}</span>
+                                    </div>
                     <div>
                         <span>Gewenst krediet</span>
                         <span>{formatCurrency(calculateGewenstKrediet())}</span>
                     </div>
-                    {leaseType === 'private' && selectedVoertuig && (
+                    {leaseType === 'financial' && (
                         <>
                             <div>
-                                <span>Merk</span>
-                                <span>{selectedVoertuig.fields.Merk}</span>
+                                <span>BTW-bedrag</span>
+                                <span>{formatCurrency(calculateBtwBedrag())}</span>
                             </div>
                             <div>
-                                <span>Type</span>
-                                <span>{selectedVoertuig.fields.Model}</span>
+                                <span>Inruil</span>
+                                <span>{formatCurrency(formData.inruil)}</span>
                             </div>
-                            {formData.kenteken && (
-                                <div>
-                                    <span>Kenteken</span>
-                                    <span>{formData.kenteken}</span>
-                                </div>
-                            )}
+                            <div>
+                                <span>Totaal aan te betalen</span>
+                                <span>{formatCurrency(calculateTotaalAanTeBetalen())}</span>
+                            </div>
+                            <div>
+                                <span>Leasebedrag</span>
+                                <span>{formatCurrency(calculateLeasebedrag())}</span>
+                            </div>
+                            <div>
+                                <span>Slottermijn ({calculateSlottermijnPercentage()}%)</span>
+                                <span>{formatCurrency(calculateSlottermijnBedrag())}</span>
+                            </div>
+                            <div>
+                                <span>Te financieren bedrag</span>
+                                <span>{formatCurrency(calculateTeFinancierenBedrag())}</span>
+                            </div>
                         </>
                     )}
-                    {leaseType === 'financial' && (
+                    {formData.kenteken && (
                         <div>
-                            <span>Eigendom na looptijd</span>
-                            <span>✓</span>
+                            <span>Kenteken</span>
+                            <span>{formData.kenteken}</span>
                         </div>
                     )}
                     {leaseType === 'private' && (
@@ -415,13 +627,19 @@ export default function LeaseForm({ onComplete }) {
             </div>
 
             <div className="bottom-section">
-                <div className="info-line">
-                    <span className="check-icon"></span>
-                    Uitslag binnen: <strong>35 minuten</strong>
-                </div>
                 <button 
                     className="submit-button"
-                    onClick={handleSubmit}
+                    onClick={() => {
+                        // Stuur notificatie bij formulier indiening
+                        notificationService.showNotification('📋 Formulier wordt ingediend', {
+                            body: `${leaseType === 'financial' ? 'Financial Lease' : 
+                                   leaseType === 'private' ? 'Private Lease' : 'Operational Lease'} aanvraag wordt verwerkt...`,
+                            type: 'new-request',
+                            tag: 'form-submitting'
+                        });
+                        
+                        handleSubmit();
+                    }}
                     disabled={selectedVoertuig === null || formData.verkoopprijs <= 0}
                 >
                     {leaseType === 'financial' ? 'Volgende stap' : 

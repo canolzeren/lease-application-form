@@ -42,23 +42,53 @@ export default function BusinessInfo({ onBack, leaseData }) {
     console.log('Form data:', formData);
     console.log('Lease data:', leaseData);
 
+    // Debug de incoming lease data
+    console.log('🔍 Raw leaseData object:', leaseData);
+    console.log('🔍 Available leaseData keys:', Object.keys(leaseData || {}));
+    console.log('🚗 Voertuig data debug:', {
+      voertuig: leaseData?.voertuig,
+      merk: leaseData?.merk,
+      type: leaseData?.type,
+      model: leaseData?.model,
+      selectedVoertuig: leaseData?.selectedVoertuig
+    });
+    
     const submissionData = {
-      // Gebruik alleen kolommen die daadwerkelijk bestaan in de database
+      // Persoonlijke gegevens
       voornaam: formData.voorletters,
       achternaam: formData.achternaam,
       email: formData.email,
       telefoon: formData.telefoonnummer,
       bedrijfsnaam: formData.bedrijfsnaam,
       kvk_nummer: formData.kvkNummer,
-      lease_type: 'Financial Lease',
-      voertuig: leaseData?.selectedVoertuig || 'N/A',
+      
+      // Lease informatie (correct mapping van LeaseForm data)
+      lease_type: leaseData?.leaseType === 'financial' ? 'Financial Lease' : 
+                  leaseData?.leaseType === 'operational' ? 'Operational Lease' : 'Financial Lease',
+      voertuig: leaseData?.voertuig || 'N/A',
+      merk: leaseData?.merk || '',
+      model: leaseData?.type || '', // LeaseForm gebruikt 'type' voor model
+      kenteken: leaseData?.kenteken || '',
+      
+      // Financiële gegevens (direct van LeaseForm)
+      verkoopprijs: leaseData?.verkoopprijs || 0,
       aanbetaling: leaseData?.aanbetaling || 0,
-      slotsom: leaseData?.slotsom || 0,
+      inruil: leaseData?.inruil || 0,
+      slottermijn: leaseData?.slottermijn || 0,
       looptijd: leaseData?.looptijd || 0,
       maandbedrag: leaseData?.maandbedrag || 0,
-      totaal_maandbedrag: (leaseData?.maandbedrag || 0) + (leaseData?.totaalOpties || 0),
+      
+      // Berekende bedragen (van LeaseForm calculations)
+      btw_bedrag: leaseData?.btwBedrag || 0,
+      aanschafwaarde_excl_btw: leaseData?.aanschafwaardeExclBtw || 0,
+      leasebedrag: leaseData?.leasebedrag || 0,
+      te_financieren_bedrag: leaseData?.teFinancierenBedrag || 0,
+      totaal_aan_te_betalen: leaseData?.totaalAanTeBetalen || 0,
+      
+      totaal_maandbedrag: leaseData?.totaalMaandbedrag || leaseData?.maandbedrag || 0,
       status: 'Nieuw',
-      // Extra producten
+      
+      // Extra producten (van ExtraOptions step)
       laadpaal: leaseData?.laadpaal || false,
       zonnepanelen: leaseData?.zonnepanelen || false,
       verzekering: leaseData?.verzekering || false,
@@ -104,10 +134,14 @@ export default function BusinessInfo({ onBack, leaseData }) {
                 achternaam: formData.achternaam,
                 email: formData.email,
                 telefoon: formData.telefoonnummer,
-                voertuig: leaseData?.selectedVoertuig || 'N/A',
+                voertuig: leaseData?.voertuig || 'N/A',
                 maandbedrag: leaseData?.maandbedrag || 0,
-                looptijd: leaseData?.looptijd || 0
+                looptijd: leaseData?.looptijd || 0,
+                verkoopprijs: leaseData?.verkoopprijs || 0,
+                aanbetaling: leaseData?.aanbetaling || 0
               };
+              
+              console.log('🔧 Simple insert data:', simpleData);
               
               const { data: simpleInsertData, error: simpleError } = await supabase
                 .from('lease_aanvragen')
@@ -126,6 +160,19 @@ export default function BusinessInfo({ onBack, leaseData }) {
               rowsAffected: data?.length || 0,
               firstRecord: data?.[0]
             });
+            
+            // Trigger notification via local storage for cross-tab communication
+            try {
+              const notificationData = {
+                type: 'new_lease_request',
+                data: data[0],
+                timestamp: Date.now()
+              };
+              localStorage.setItem('newLeaseNotification', JSON.stringify(notificationData));
+              console.log('📢 Notification data stored for cross-tab communication');
+            } catch (notifError) {
+              console.log('⚠️ Could not store notification data:', notifError);
+            }
           }
         } catch (supabaseError) {
           console.error('❌ Supabase submission failed:', supabaseError);
@@ -157,21 +204,11 @@ export default function BusinessInfo({ onBack, leaseData }) {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '2rem auto' }}>
-       <div style={{
-          padding: '20px', 
-          marginBottom: '20px', 
-          borderRadius: '8px',
-          background: 'linear-gradient(135deg, #d846b4 0%, #c2185b 100%)',
-          color: 'white'
-        }}>
-          <h2 style={{ margin: 0, marginBottom: '10px', fontWeight: '700' }}>
-            Financial Lease Aanvraaggegevens
-          </h2>
-          <p style={{ margin: 0, color: 'rgba(255,255,255,0.9)' }}>
-            Vul uw gegevens in om de financial lease aanvraag af te ronden
-          </p>
-        </div>
+    <div className="lease-form-container">
+      <div className="step-header">
+        <h2>Bedrijfsgegevens</h2>
+        <p className="step-description">Vul uw contactgegevens en bedrijfsinformatie in</p>
+      </div>
 
       {submitStatus === 'success' && (
         <div className="alert alert-success">
@@ -184,33 +221,29 @@ export default function BusinessInfo({ onBack, leaseData }) {
         </div>
       )}
 
-      <div style={{ 
-        backgroundColor: 'white',
-        padding: '20px', 
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-          <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Aanvraaggegevens</h3>
-          
-          <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
-            <div style={{ flex: 1 }}>
+      <div className="form-section">
+          <div className="inputs-container">
+            <div className="input-group">
               <label>Naam *</label>
               <input 
                 type="text" 
+                className="input-box"
                 value={formData.voorletters} 
                 onChange={handleChange('voorletters')} 
                 onBlur={handleBlur('voorletters')} 
                 required 
-                placeholder="Jan Janssen"
+                placeholder="Jan"
               />
               {touched.voorletters && !formData.voorletters.trim() && (
-                <span style={{ color: '#dc3545', fontSize: '12px' }}>Naam is verplicht</span>
+                <span className="error-message">Naam is verplicht</span>
               )}
             </div>
-            <div style={{ flex: 1 }}>
+            
+            <div className="input-group">
               <label>Achternaam *</label>
               <input 
                 type="text" 
+                className="input-box"
                 value={formData.achternaam} 
                 onChange={handleChange('achternaam')} 
                 onBlur={handleBlur('achternaam')} 
@@ -218,16 +251,15 @@ export default function BusinessInfo({ onBack, leaseData }) {
                 placeholder="Janssen"
               />
               {touched.achternaam && !formData.achternaam.trim() && (
-                <span style={{ color: '#dc3545', fontSize: '12px' }}>Achternaam is verplicht</span>
+                <span className="error-message">Achternaam is verplicht</span>
               )}
             </div>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
-            <div style={{ flex: 1 }}>
+            
+            <div className="input-group">
               <label>E-mailadres *</label>
               <input 
                 type="email" 
+                className="input-box"
                 value={formData.email} 
                 onChange={handleChange('email')} 
                 onBlur={handleBlur('email')} 
@@ -235,13 +267,15 @@ export default function BusinessInfo({ onBack, leaseData }) {
                 placeholder="jan.janssen@bedrijf.nl"
               />
               {touched.email && !formData.email.trim() && (
-                <span style={{ color: '#dc3545', fontSize: '12px' }}>E-mailadres is verplicht</span>
+                <span className="error-message">E-mailadres is verplicht</span>
               )}
             </div>
-            <div style={{ flex: 1 }}>
+            
+            <div className="input-group">
               <label>Telefoonnummer *</label>
               <input 
                 type="tel" 
+                className="input-box"
                 value={formData.telefoonnummer} 
                 onChange={handleChange('telefoonnummer')} 
                 onBlur={handleBlur('telefoonnummer')} 
@@ -249,85 +283,65 @@ export default function BusinessInfo({ onBack, leaseData }) {
                 placeholder="06 12345678"
               />
               {touched.telefoonnummer && !formData.telefoonnummer.trim() && (
-                <span style={{ color: '#dc3545', fontSize: '12px' }}>Telefoonnummer is verplicht</span>
+                <span className="error-message">Telefoonnummer is verplicht</span>
+              )}
+            </div>
+            
+            <div className="input-group">
+              <label>Bedrijfsnaam</label>
+              <input 
+                type="text" 
+                className="input-box"
+                value={formData.bedrijfsnaam} 
+                onChange={handleChange('bedrijfsnaam')} 
+                onBlur={handleBlur('bedrijfsnaam')} 
+                placeholder="Janssen B.V."
+              />
+            </div>
+            
+            <div className="input-group">
+              <label>KVK-nummer</label>
+              <input 
+                type="text" 
+                className="input-box"
+                value={formData.kvkNummer} 
+                onChange={handleChange('kvkNummer')} 
+                onBlur={handleBlur('kvkNummer')} 
+                placeholder="12345678"
+              />
+            </div>
+            
+            <div className="input-group">
+              <label className="simple-checkbox-label">
+                <input 
+                  type="checkbox" 
+                  checked={formData.termsAccepted} 
+                  onChange={handleChange('termsAccepted')}
+                  onBlur={handleBlur('termsAccepted')}
+                  required
+                />
+                <span>Ik ga akkoord met de voorwaarden en geef toestemming voor BKR-toetsing en dataverwerking *</span>
+              </label>
+              {touched.termsAccepted && !formData.termsAccepted && (
+                <span className="error-message">U moet akkoord gaan met de voorwaarden om verder te gaan</span>
               )}
             </div>
           </div>
 
-          <hr style={{ margin: '20px 0' }} />
-          
-          <h3 style={{ marginTop: 0, marginBottom: '15px' }}>Bedrijfsgegevens</h3>
-          <div style={{ marginBottom: '15px' }}>
-            <label>Bedrijfsnaam</label>
-            <input 
-              type="text" 
-              value={formData.bedrijfsnaam} 
-              onChange={handleChange('bedrijfsnaam')} 
-              onBlur={handleBlur('bedrijfsnaam')} 
-              placeholder="Janssen B.V."
-            />
-          </div>
-          
-          <div style={{ marginBottom: '20px' }}>
-            <label>KVK-nummer</label>
-            <input 
-              type="text" 
-              value={formData.kvkNummer} 
-              onChange={handleChange('kvkNummer')} 
-              onBlur={handleBlur('kvkNummer')} 
-              placeholder="12345678"
-            />
-          </div>
-
-          <hr style={{ margin: '20px 0' }} />
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <input type="checkbox" checked={formData.termsAccepted} onChange={handleChange('termsAccepted')} />
-              <span>Ik ga akkoord met de voorwaarden *</span>
-            </label>
-            {touched.termsAccepted && !formData.termsAccepted && (
-              <span style={{ color: '#dc3545', fontSize: '12px', display: 'block', marginTop: '5px' }}>
-                U moet akkoord gaan met de voorwaarden
-              </span>
-            )}
-          </div>
-
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <button onClick={onBack} className="secondary-button" style={{ flex: 1 }}>Terug</button>
+        <div className="button-container">
+          <button 
+            onClick={onBack} 
+            className="secondary-button"
+          >
+            Terug
+          </button>
           <button 
             onClick={submitToSupabase} 
             disabled={!isFormValid() || isSubmitting} 
-            className="primary-button" 
-            style={{ flex: 1 }}
+            className="primary-button"
           >
-            {isSubmitting ? 'Bezig...' : 'Financial Lease Aanvraag Indienen'}
+            {isSubmitting ? 'Bezig met verzenden...' : 'Aanvraag Indienen'}
           </button>
-        </div>
-        
-        {/* Debug informatie */}
-        <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '4px', fontSize: '12px' }}>
-          <strong>Debug info:</strong><br/>
-          Form valid: {isFormValid() ? 'Ja' : 'Nee'}<br/>
-          Voorletters: {formData.voorletters ? 'Ingevuld' : 'Leeg'}<br/>
-          Achternaam: {formData.achternaam ? 'Ingevuld' : 'Leeg'}<br/>
-          Email: {formData.email ? 'Ingevuld' : 'Leeg'}<br/>
-          Telefoon: {formData.telefoonnummer ? 'Ingevuld' : 'Leeg'}<br/>
-          Terms: {formData.termsAccepted ? 'Geaccepteerd' : 'Niet geaccepteerd'}<br/>
-          <br/>
-          <strong>Lease Data:</strong><br/>
-          Voertuig: {leaseData?.selectedVoertuig || 'Niet geselecteerd'}<br/>
-          Maandbedrag: €{leaseData?.maandbedrag || 0}<br/>
-          Looptijd: {leaseData?.looptijd || 0} maanden<br/>
-          <br/>
-          <strong>Supabase Status:</strong><br/>
-          Supabase configured: {isSupabaseAvailable() ? 'Ja' : 'Nee'}<br/>
-          {!isSupabaseAvailable() && (
-            <>
-              <span style={{color: '#dc3545'}}>⚠️ Supabase niet geconfigureerd</span><br/>
-              <span style={{fontSize: '10px'}}>Maak een .env bestand aan met VITE_SUPABASE_URL en VITE_SUPABASE_ANON_KEY</span>
-            </>
-          )}
         </div>
       </div>
     </div>
