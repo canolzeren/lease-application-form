@@ -302,7 +302,6 @@ function CRM() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [selectedRequest, setSelectedRequest] = React.useState(null);
-  const [showDetails, setShowDetails] = React.useState(false);
   const [editingField, setEditingField] = React.useState(null);
   const [editValue, setEditValue] = React.useState('');
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(false);
@@ -447,11 +446,10 @@ function CRM() {
         tag: 'new-lease-request'
       });
       
-      notification.onclick = () => {
-        window.focus();
-        setSelectedRequest(newRequest);
-        setShowDetails(true);
-      };
+                   notification.onclick = () => {
+               window.focus();
+               setSelectedRequest(newRequest);
+             };
     }
   };
 
@@ -761,23 +759,20 @@ function CRM() {
         </td>
         <td>{request.created_at || '-'}</td>
         <td>
-          <button
-            onClick={() => {
-              setSelectedRequest(request);
-              setShowDetails(true);
-            }}
-            style={{
-              padding: '4px 8px',
-              borderRadius: '4px',
-              border: 'none',
-              background: '#007bff',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
-          >
-            Details
-          </button>
+                           <button
+                   onClick={() => setSelectedRequest(request)}
+                   style={{
+                     padding: '4px 8px',
+                     borderRadius: '4px',
+                     border: 'none',
+                     background: selectedRequest?.id === request.id ? '#28a745' : '#007bff',
+                     color: 'white',
+                     cursor: 'pointer',
+                     fontSize: '12px'
+                   }}
+                 >
+                   {selectedRequest?.id === request.id ? 'Geselecteerd' : 'Details'}
+                 </button>
         </td>
       </tr>
     );
@@ -843,111 +838,101 @@ function CRM() {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-            <thead>
-              <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>ID</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Voornaam</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Achternaam</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Email</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Telefoon</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Merk</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Model</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Lease Type</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Status</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Aangemaakt</th>
-                <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Acties</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRequests.map(renderRequestRow)}
-            </tbody>
-          </table>
-        </div>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          {/* Tabel aan de linkerkant */}
+          <div style={{ flex: 1, overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+              <thead>
+                <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>ID</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Voornaam</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Achternaam</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Email</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Telefoon</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Merk</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Model</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Lease Type</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Status</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Aangemaakt</th>
+                  <th style={{ padding: '12px 8px', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>Acties</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRequests.map(renderRequestRow)}
+              </tbody>
+            </table>
 
-        {filteredRequests.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-            <p>Geen lease aanvragen gevonden.</p>
+            {filteredRequests.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                <p>Geen lease aanvragen gevonden.</p>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Detailweergave aan de rechterkant */}
+          {selectedRequest && (
+            <div style={{
+              width: '400px',
+              background: 'white',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              padding: '20px',
+              height: 'fit-content',
+              position: 'sticky',
+              top: '20px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ margin: 0 }}>Details van Aanvraag #{selectedRequest.id}</h3>
+                <button
+                  onClick={() => setSelectedRequest(null)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    color: '#666',
+                    padding: '0',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>Persoonlijke Gegevens</h4>
+                <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '6px' }}>
+                  <p style={{ margin: '5px 0' }}><strong>Naam:</strong> {selectedRequest.voornaam} {selectedRequest.achternaam}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Email:</strong> {selectedRequest.email}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Telefoon:</strong> {selectedRequest.telefoon}</p>
+                </div>
+              </div>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>Voertuig</h4>
+                <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '6px' }}>
+                  <p style={{ margin: '5px 0' }}><strong>Merk:</strong> {selectedRequest.merk}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Model:</strong> {selectedRequest.model}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Type:</strong> {selectedRequest.voertuig}</p>
+                </div>
+              </div>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>Lease Details</h4>
+                <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '6px' }}>
+                  <p style={{ margin: '5px 0' }}><strong>Type:</strong> {selectedRequest.lease_type}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Status:</strong> {selectedRequest.status}</p>
+                  <p style={{ margin: '5px 0' }}><strong>Aangemaakt:</strong> {selectedRequest.created_at}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-
-      {showDetails && selectedRequest && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            maxWidth: '600px',
-            maxHeight: '80vh',
-            overflow: 'auto'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3>Details van Aanvraag #{selectedRequest.id}</h3>
-              <button
-                onClick={() => setShowDetails(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  color: '#666'
-                }}
-              >
-                ×
-              </button>
-            </div>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <h4>Persoonlijke Gegevens</h4>
-              <p><strong>Naam:</strong> {selectedRequest.voornaam} {selectedRequest.achternaam}</p>
-              <p><strong>Email:</strong> {selectedRequest.email}</p>
-              <p><strong>Telefoon:</strong> {selectedRequest.telefoon}</p>
-            </div>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <h4>Voertuig</h4>
-              <p><strong>Merk:</strong> {selectedRequest.merk}</p>
-              <p><strong>Model:</strong> {selectedRequest.model}</p>
-              <p><strong>Type:</strong> {selectedRequest.voertuig}</p>
-            </div>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <h4>Lease Details</h4>
-              <p><strong>Type:</strong> {selectedRequest.lease_type}</p>
-              <p><strong>Status:</strong> {selectedRequest.status}</p>
-              <p><strong>Aangemaakt:</strong> {selectedRequest.created_at}</p>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setShowDetails(false)}
-                style={{
-                  padding: '8px 16px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  background: 'white',
-                  cursor: 'pointer'
-                }}
-              >
-                Sluiten
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
