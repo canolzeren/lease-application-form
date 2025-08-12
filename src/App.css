@@ -156,6 +156,53 @@ body {
   will-change: auto !important;
 }
 
+/* Navigation */
+.nav-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: var(--secondary);
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+}
+
+.nav-title {
+  margin: 0;
+  color: var(--foreground);
+}
+
+.nav-links {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-link {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background: var(--secondary);
+  color: var(--foreground);
+  cursor: pointer;
+  font-weight: normal;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  background: var(--accent);
+}
+
+.nav-link.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: bold;
+}
+
 /* Header */
 .header {
   background: var(--card);
@@ -218,6 +265,7 @@ body {
   transition: all 0.2s ease;
   font-size: 0.875rem;
   min-height: 44px;
+  min-width: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -238,7 +286,7 @@ body {
 
 /* Lease Form Container */
 .lease-form-container {
-  max-width: 450px;
+  max-width: 800px;
   margin: 1rem auto;
   padding: 1.5rem;
   background: var(--card);
@@ -398,9 +446,39 @@ div {
 /* Input Groups */
 .inputs-container {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+/* Geboortedatum velden - altijd 3 kolommen naast elkaar */
+.birthdate-container {
+  display: grid;
+  grid-template-columns: 60px 60px 100px;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+/* Persoonsgegevens rijen - altijd 3 kolommen naast elkaar op desktop */
+.personal-details-row {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+/* Responsive grid voor inputs */
+@media (max-width: 768px) {
+  .inputs-container {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .birthdate-container {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .personal-details-row {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .input-group label {
@@ -426,6 +504,12 @@ div {
 .input-box:focus-within {
   border-color: var(--ring);
   box-shadow: 0 0 0 2px var(--ring);
+}
+
+.input-box.disabled {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  cursor: not-allowed;
 }
 
 .input-box input {
@@ -594,8 +678,8 @@ div {
 /* Bottom Section */
 .bottom-section {
   margin-top: 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: 1rem;
 }
@@ -643,6 +727,11 @@ div {
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
+  min-height: 44px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .submit-button:hover:not(:disabled) {
@@ -754,6 +843,12 @@ div {
     margin-bottom: 1.5rem;
 }
 
+.success-icon {
+  font-size: 60px;
+  color: #4CAF50;
+  margin-bottom: 20px;
+}
+
 .summary {
   background: var(--muted);
   border-radius: var(--radius);
@@ -771,8 +866,17 @@ div {
 
 .summary-grid {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
   font-size: 0.875rem;
+}
+
+/* Responsive summary grid */
+@media (max-width: 768px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 }
 
 .summary-grid > div {
@@ -797,10 +901,6 @@ div {
     max-width: 100%;
     margin: 0.5rem;
     padding: 1rem;
-  }
-  
-.inputs-container {
-    grid-template-columns: 1fr;
   }
   
   .lease-type-tabs {
@@ -853,16 +953,19 @@ div {
     font-size: 1rem;
 }
 
-.submit-button {
+.submit-button,
+.secondary-button {
     width: 100%;
     margin-top: 0.5rem;
     padding: 1rem 2rem;
     font-size: 1rem;
+    min-width: auto;
 }
   
     .bottom-section {
-        grid-template-columns: 1fr;
+        flex-direction: column;
         text-align: center;
+        gap: 1rem;
     }
   
   /* Progress responsive styles verwijderd */
@@ -1295,6 +1398,26 @@ div {
     font-weight: 600;
     color: var(--foreground);
     font-size: 1rem;
+}
+
+.slottermijn-warning {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #fecaca;
+    border-radius: 8px;
+    border: 1px solid #f87171;
+}
+
+.slottermijn-warning h4 {
+    margin: 0 0 0.5rem 0;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.slottermijn-warning p {
+    margin: 0;
+    color: #dc2626;
+    font-size: 0.875rem;
 }
 
 @media (max-width: 768px) {
@@ -1782,8 +1905,9 @@ div {
     }
     
     .inputs-container {
-        grid-template-columns: 1fr !important;
-        gap: 1.25rem !important;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
     }
     
     /* Improved form field spacing */

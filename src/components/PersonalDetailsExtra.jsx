@@ -45,86 +45,88 @@ export default function PersonalDetailsExtra({ onBack, onComplete, initialData =
       </div>
 
       <div className="form-section">
-        <div className="input-group">
-          <label>Aanhef</label>
-          <select 
-            className="vehicle-select"
-            value={form.aanhef} 
-            onChange={handleChange('aanhef')}
-          >
-            <option value="">Kies aanhef</option>
-            {aanhefOpties.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-          </select>
-        </div>
-        <div className="input-group">
-          <label>Voorletters *</label>
-          <input 
-            type="text" 
-            className="input-box"
-            value={form.voorletters} 
-            onChange={handleChange('voorletters')} 
-            onBlur={handleBlur('voorletters')} 
-            required 
-          />
-        </div>
-        <div className="input-group">
-          <label>Achternaam *</label>
-          <input 
-            type="text" 
-            className="input-box"
-            value={form.achternaam} 
-            onChange={handleChange('achternaam')} 
-            onBlur={handleBlur('achternaam')} 
-            required 
-          />
-        </div>
-        <div className="input-group">
-          <label>Geboortedatum *</label>
-          <div className="inputs-container">
+        {/* Regel 1: Aanhef, voornaam en achternaam */}
+        <div className="inputs-container personal-details-row">
+          <div className="input-group">
+            <label>Aanhef</label>
+            <select 
+              className="vehicle-select"
+              value={form.aanhef} 
+              onChange={handleChange('aanhef')}
+            >
+              <option value="">Kies aanhef</option>
+              {aanhefOpties.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
+          <div className="input-group">
+            <label>Voorletters *</label>
             <input 
               type="text" 
-              placeholder="DD" 
-              maxLength={2} 
               className="input-box"
-              style={{ width: '100%' }}
-              value={form.geboortedag} 
-              onChange={handleChange('geboortedag')} 
-              onBlur={handleBlur('geboortedag')} 
+              value={form.voorletters} 
+              onChange={handleChange('voorletters')} 
+              onBlur={handleBlur('voorletters')} 
               required 
             />
+          </div>
+          <div className="input-group">
+            <label>Achternaam *</label>
             <input 
               type="text" 
-              placeholder="MM" 
-              maxLength={2} 
               className="input-box"
-              style={{ width: '100%' }}
-              value={form.geboortemaand} 
-              onChange={handleChange('geboortemaand')} 
-              onBlur={handleBlur('geboortemaand')} 
-              required 
-            />
-            <input 
-              type="text" 
-              placeholder="JJJJ" 
-              maxLength={4} 
-              className="input-box"
-              style={{ width: '100%' }}
-              value={form.geboortejaar} 
-              onChange={handleChange('geboortejaar')} 
-              onBlur={handleBlur('geboortejaar')} 
+              value={form.achternaam} 
+              onChange={handleChange('achternaam')} 
+              onBlur={handleBlur('achternaam')} 
               required 
             />
           </div>
         </div>
-        <div className="input-group">
-          <label>Burgerlijke staat</label>
-          <select 
-            className="vehicle-select"
-            value={form.burgerlijkeStaat} 
-            onChange={handleChange('burgerlijkeStaat')}
-          >
-            {burgerlijkeStaatOpties.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-          </select>
+
+        {/* Regel 2: Geboortedatum en burgerlijke staat */}
+        <div className="inputs-container personal-details-row">
+          <div className="input-group">
+            <label>Geboortedatum *</label>
+            <div className="birthdate-container">
+              <input 
+                type="text" 
+                placeholder="DD" 
+                maxLength={2} 
+                className="input-box"
+                value={form.geboortedag} 
+                onChange={handleChange('geboortedag')} 
+                onBlur={handleBlur('geboortedag')} 
+                required 
+              />
+              <input 
+                type="text" 
+                placeholder="MM" 
+                maxLength={2} 
+                className="input-box"
+                value={form.geboortemaand} 
+                onChange={handleChange('geboortemaand')} 
+                onBlur={handleBlur('geboortemaand')} 
+              />
+              <input 
+                type="text" 
+                placeholder="JJJJ" 
+                maxLength={4} 
+                className="input-box"
+                value={form.geboortejaar} 
+                onChange={handleChange('geboortejaar')} 
+                onBlur={handleBlur('geboortejaar')} 
+              />
+            </div>
+          </div>
+          <div className="input-group">
+            <label>Burgerlijke staat</label>
+            <select 
+              className="vehicle-select"
+              value={form.burgerlijkeStaat} 
+              onChange={handleChange('burgerlijkeStaat')}
+            >
+              {burgerlijkeStaatOpties.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
         </div>
       </div>
 
