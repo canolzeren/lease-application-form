@@ -336,7 +336,7 @@ export default function LeaseForm({ onComplete, onShowCalculator, onShowContact 
                 {loading ? (
                     <p>Laden van voertuigen...</p>
                 ) : error ? (
-                    <p style={{ color: 'red' }}>{error}</p>
+                    <p className="error-message">{error}</p>
                 ) : (
                     <select 
                         className="vehicle-select"
@@ -389,7 +389,7 @@ export default function LeaseForm({ onComplete, onShowCalculator, onShowContact 
 
                         <div className="input-group">
                             <label>Uw gewenst krediet</label>
-                            <div className="input-box" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
+                            <div className="input-box disabled">
                                 {formatCurrency(calculateGewenstKrediet())}
                             </div>
                         </div>
@@ -445,17 +445,9 @@ export default function LeaseForm({ onComplete, onShowCalculator, onShowContact 
 
                     {/* Slottermijn waarschuwing */}
                     {isSlottermijnTooHigh() && (
-                        <div style={{
-                            marginTop: '1rem',
-                            padding: '1rem',
-                            backgroundColor: '#fecaca',
-                            borderRadius: '8px',
-                            border: '1px solid #f87171'
-                        }}>
-                            <h4 style={{ margin: '0 0 0.5rem 0', color: '#dc2626', fontWeight: '600' }}>
-                                ⚠️ Slottermijn te hoog
-                            </h4>
-                            <p style={{ margin: '0', color: '#dc2626', fontSize: '0.875rem' }}>
+                        <div className="slottermijn-warning">
+                            <h4>⚠️ Slottermijn te hoog</h4>
+                            <p>
                                 De opgegeven slottermijn is hoger dan toegestaan.<br/>
                                 De maximale slottermijn is {formatCurrency(calculateMaxSlottermijn())}
                             </p>

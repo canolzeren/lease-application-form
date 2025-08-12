@@ -136,18 +136,20 @@ export default function FinancialDetails({ onBack, onComplete, initialData = {} 
             </select>
           </div>
         </div>
-        <div className="input-group">
-          <label>Maandelijkse woonlast *</label>
-          <input 
-            type="number" 
-            min="0" 
-            step="1" 
-            className="input-box"
-            value={form.woonlast} 
-            onChange={handleChange('woonlast')} 
-            onBlur={handleBlur('woonlast')} 
-            required 
-          />
+        <div className="inputs-container">
+          <div className="input-group">
+            <label>Maandelijkse woonlast *</label>
+            <input 
+              type="number" 
+              min="0" 
+              step="1" 
+              className="input-box"
+              value={form.woonlast} 
+              onChange={handleChange('woonlast')} 
+              onBlur={handleBlur('woonlast')} 
+              required 
+            />
+          </div>
         </div>
       </div>
 

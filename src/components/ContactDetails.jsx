@@ -39,6 +39,7 @@ export default function ContactDetails({ onBack, onComplete, initialData = {} })
       </div>
 
       <div className="form-section">
+        {/* Regel 1: Straatnaam, huisnummer en toevoeging op één regel */}
         <div className="inputs-container">
           <div className="input-group">
             <label>Straatnaam *</label>
@@ -62,16 +63,20 @@ export default function ContactDetails({ onBack, onComplete, initialData = {} })
               required 
             />
           </div>
+          <div className="input-group">
+            <label>Huisnummer toevoeging</label>
+            <input 
+              type="text" 
+              className="input-box"
+              value={form.toevoeging} 
+              onChange={handleChange('toevoeging')} 
+              maxLength={5}
+              style={{ width: '80px' }}
+            />
+          </div>
         </div>
-        <div className="input-group">
-          <label>Huisnummer toevoeging</label>
-          <input 
-            type="text" 
-            className="input-box"
-            value={form.toevoeging} 
-            onChange={handleChange('toevoeging')} 
-          />
-        </div>
+
+        {/* Regel 3: Postcode en woonplaats */}
         <div className="inputs-container">
           <div className="input-group">
             <label>Postcode *</label>
@@ -96,6 +101,8 @@ export default function ContactDetails({ onBack, onComplete, initialData = {} })
             />
           </div>
         </div>
+
+        {/* Regel 4: Telefoon en email */}
         <div className="inputs-container">
           <div className="input-group">
             <label>Telefoonnummer *</label>

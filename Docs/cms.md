@@ -1,0 +1,1 @@
+alle aanvragen moeten onder elkaar staan en als je op een aanvraag klikt moet er een side panel verschijnen
